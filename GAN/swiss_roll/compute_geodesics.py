@@ -1,5 +1,4 @@
-import GAN.swiss_roll.geodesic_objective_graph
-
+from GAN.swiss_roll.geodesic_objective_graph import *
 
 
 saver = tf.train.Saver()

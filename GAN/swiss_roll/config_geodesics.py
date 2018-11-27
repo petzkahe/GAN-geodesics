@@ -1,3 +1,5 @@
+methods = ["Jacobian"]
+
 learning_rate_geodesics = 1e-4
 
 n_geodesics = 10
@@ -9,3 +11,5 @@ n_train_iterations_geodesics = 500
 endpoint_initialization_mode ="random"
 
 penalty = False
+
+log_directory_geodesics = 'logs_geo'

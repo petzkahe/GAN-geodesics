@@ -1,16 +1,5 @@
 from GAN.swiss_roll.geodesic_graph import *
 
-# run GAN-graph herer?
-with tf.variable_scope("GAN"):
-    tf.data_generated = Generator(data_latent)
-    disc_values_on_real = Discriminator(data_real)
-    disc_values_on_generated = Discriminator(data_generated)
-
-#saver = tf.train.Saver()
-#model_saver = tf.train.import_meta_graph('./trained_model/swissGAN.meta')
-model_saver = tf.train.Saver()
-
-
 def set_up_training(objective_Jacobian, objective_proposed):
 
 
@@ -60,10 +49,16 @@ def find_geodesics(method, start, end, sess, training):
 
 def compute_geodesics(z_start, z_end):
 
+
+
+    GAN_parameters = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="GAN")
+    model_saver = tf.train.Saver(GAN_parameters)
+
+
+    train_geodesic_Jacobian, train_geodesic_proposed = set_up_training(geodesic_objective_function_Jacobian,
+                                                                       geodesic_objective_function_proposed)
     with tf.Session() as session:
 
-        train_geodesic_Jacobian, train_geodesic_proposed = set_up_training(geodesic_objective_function_Jacobian,
-                                                                          geodesic_objective_function_proposed)
 
         # methods=["linear", "Jacobian", "proposed"]
 
@@ -81,10 +76,7 @@ def compute_geodesics(z_start, z_end):
 
             variables_names = [v.name for v in tf.trainable_variables()]
             values = session.run(variables_names)
-            for k, v in zip(variables_names, values):
-                print("Variable: ", k)
-                print("Shape: ", v.shape)
-                print(v)
+
 
         # session run of fakes = grid of latent points, gives fakes_sample_space, discriminator values, and possibly jacobian metric
         # supplementary_dict = above stuff

@@ -3,7 +3,7 @@ from GAN.swiss_roll.config_geodesics import *
 
 import numpy as np
 
-# run gan-graph here?
+
 
 with tf.variable_scope("Geodesics"):
 
@@ -14,7 +14,7 @@ with tf.variable_scope("Geodesics"):
     coefficients = tf.Variable(initial_value=coefficients_initializations, name='coefficients')
 
 
-    def parametrize_curve(z_start, z_end, interpolation_degree, no_geodesic_interpolations):
+def parametrize_curve(z_start, z_end, interpolation_degree, no_geodesic_interpolations):
 
         constant_part = tf.reshape(z_start, shape=(1, dim_latent, n_geodesics))
         linear_part = tf.reshape(z_end, shape=(1, dim_latent, n_geodesics)) - tf.reshape(z_start, shape=(
@@ -44,34 +44,34 @@ with tf.variable_scope("Geodesics"):
         return geodesic_points_in_z
 
 
-    curves_in_latent_space = parametrize_curve(z_start, z_end, degree_polynomial_geodesic_latent, n_interpolations_points_geodesic)
-    curves_in_latent_space_vectorized = tf.reshape(tf.transpose(curves_in_latent_space, perm=[2, 0, 1]),
+curves_in_latent_space = parametrize_curve(z_start, z_end, degree_polynomial_geodesic_latent, n_interpolations_points_geodesic)
+curves_in_latent_space_vectorized = tf.reshape(tf.transpose(curves_in_latent_space, perm=[2, 0, 1]),
                                                    shape=(n_geodesics * (n_interpolations_points_geodesic + 1), dim_latent))
 
-with tf.variable_scope("GAN"):
 
+with tf.variable_scope("GAN"):
     curves_in_sample_space_vectorized = Generator(curves_in_latent_space_vectorized)
     disc_values_curves_sample_space_vectorized = Discriminator(curves_in_sample_space_vectorized)
 
-with tf.variable_scope("Geodesics"):
-
-    disc_values_curves_sample_space = tf.transpose(tf.reshape(disc_values_curves_sample_space_vectorized, shape=(n_geodesics, n_interpolations_points_geodesic + 1)), perm=(1, 0))
-
-    curves_in_sample_space = tf.transpose(tf.reshape(curves_in_sample_space_vectorized, shape=(n_geodesics,n_interpolations_points_geodesic+ 1, dim_data)),
-                                          perm = [1,2,0])
-
-    diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
 
 
-    objective_vector_proposed = tf.divide(diff_square_vector, disc_values_curves_sample_space[1:,:])
-    objective_vector_Jacobian = diff_square_vector
+disc_values_curves_sample_space = tf.transpose(tf.reshape(disc_values_curves_sample_space_vectorized, shape=(n_geodesics, n_interpolations_points_geodesic + 1)), perm=(1, 0))
 
-    if penalty == True:
-        geodesic_penalty = tf.reduce_max(diff_square_vector)  # maximum of norm difference in sample space
-        penalty_hyper_param = 100.
-    else:
-        geodesic_penalty = 0
-        penalty_hyper_param = 0
+curves_in_sample_space = tf.transpose(tf.reshape(curves_in_sample_space_vectorized, shape=(n_geodesics,n_interpolations_points_geodesic+ 1, dim_data)),
+                                      perm = [1,2,0])
 
-    geodesic_objective_function_proposed = tf.reduce_sum(objective_vector_proposed) + penalty_hyper_param * geodesic_penalty
-    geodesic_objective_function_Jacobian = tf.reduce_sum(objective_vector_Jacobian) + penalty_hyper_param * geodesic_penalty
+diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
+
+
+objective_vector_proposed = tf.divide(diff_square_vector, disc_values_curves_sample_space[1:,:])
+objective_vector_Jacobian = diff_square_vector
+
+if penalty == True:
+    geodesic_penalty = tf.reduce_max(diff_square_vector)  # maximum of norm difference in sample space
+    penalty_hyper_param = 100.
+else:
+    geodesic_penalty = 0
+    penalty_hyper_param = 0
+
+geodesic_objective_function_proposed = tf.reduce_sum(objective_vector_proposed) + penalty_hyper_param * geodesic_penalty
+geodesic_objective_function_Jacobian = tf.reduce_sum(objective_vector_Jacobian) + penalty_hyper_param * geodesic_penalty

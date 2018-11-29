@@ -28,7 +28,7 @@ def set_up_training(objective_Jacobian, objective_proposed):
 
 def find_geodesics(method, start, end, sess, training):
 
-    if method == "Jacobian":
+    if method == "Jacobian" or  method=="proposed":
 
         for iteraton in range(n_train_iterations_geodesics):
             _ = sess.run([training], feed_dict={z_start : start, z_end: end})
@@ -37,6 +37,8 @@ def find_geodesics(method, start, end, sess, training):
         _curves_in_latent_space_value, _curves_in_sample_space_value = sess.run(
             [curves_in_latent_space, curves_in_sample_space],
             feed_dict={z_start: start, z_end: end})
+
+
 
     ##### Add methods here and in config
 
@@ -47,7 +49,7 @@ def find_geodesics(method, start, end, sess, training):
     return _curves_in_latent_space_value, _curves_in_sample_space_value
 
 
-def compute_geodesics(z_start, z_end):
+def compute_geodesics(latent_start, latent_end):
 
 
 
@@ -66,11 +68,39 @@ def compute_geodesics(z_start, z_end):
 
 
         for method in methods:
-            session.run(tf.initialize_all_variables())
+            session.run(tf.global_variables_initializer())
 
             model_saver.restore(session, tf.train.latest_checkpoint('trained_model/'))
 
-            curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, z_start, z_end, session,train_geodesic_Jacobian)
+            #######################################################3333
+            ########### DELETE ME WHEN DONE CHECKING STUFF
+            #############################################################
+
+            _curves_in_latent_space_value, _curves_in_sample_space_value = session.run(
+                [curves_in_latent_space, curves_in_sample_space],
+                feed_dict={z_start: latent_start, z_end: latent_end})
+
+            dict["before"] = [_curves_in_latent_space_value, _curves_in_sample_space_value]
+
+            #################################################################
+            #################################################################
+            #################################################################
+
+
+
+
+            if method == "Jacobian":
+
+                curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian)
+
+            elif method == "proposed":
+
+                curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start, latent_end,
+                                                                                            session,
+                                                                                            train_geodesic_proposed)
+            else:
+                raise Exception("method {} unknown".format(method))
+
 
             dict[method] = [curves_in_latent_space_value, curves_in_sample_space_value]
 

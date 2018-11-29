@@ -93,7 +93,7 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
     #     metric_measure_on_fakes[i] = np.log(metric_measure_on_fakes[i])
 
 
-    fig = plt.figure()
+
 
     # ax = fig.gca(projection='3d')
     # plt.pcolormesh([points[:, 0], points[:, 1]],critic_value_on_fake)
@@ -106,6 +106,9 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
 
 
     # plt.scatter(samples_real[:, 0], samples_real[:, 1], c='orange', marker='+')
+
+    plt.clf()
+
 
     for k_geodesics in range(n_geodesics):
         plt.scatter(geodesics_in_latent[:, 0, k_geodesics], geodesics_in_latent[:, 1, k_geodesics],

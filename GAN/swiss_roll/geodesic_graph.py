@@ -10,11 +10,17 @@ with tf.variable_scope("Geodesics"):
     z_start = tf.placeholder(tf.float32, shape=[1, dim_latent, n_geodesics], name='z_start')
     z_end = tf.placeholder(tf.float32, shape=[1, dim_latent, n_geodesics], name='z_end')
 
-    coefficients_initializations = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics), dtype='float32')
+    if sampling_geodesic_coefficients == "zeros":
+        coefficients_initializations = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics), dtype='float32')
+    elif sampling_geodesic_coefficients == "uniform":
+        coefficients_initializations = np.random.uniform(-2.,2., size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
+    else:
+        raise Exception("sampling method {} for geodesic coefficients unknown".format(sampling_geodesic_coefficients))
+
     coefficients = tf.Variable(initial_value=coefficients_initializations, name='coefficients')
 
 
-def parametrize_curve(z_start, z_end, interpolation_degree, no_geodesic_interpolations):
+def parametrize_curve(z_start, z_end, interpolation_degree, n_geodesic_interpolations):
 
         constant_part = tf.reshape(z_start, shape=(1, dim_latent, n_geodesics))
         linear_part = tf.reshape(z_end, shape=(1, dim_latent, n_geodesics)) - tf.reshape(z_start, shape=(
@@ -25,12 +31,12 @@ def parametrize_curve(z_start, z_end, interpolation_degree, no_geodesic_interpol
 
         # Initialize parameter variable of size interpolation_degree times dimensions_noise space
 
-        interpolation_matrix_entries = np.zeros(shape=(no_geodesic_interpolations + 1, interpolation_degree + 1))
-        for i in range(no_geodesic_interpolations + 1):
+        interpolation_matrix_entries = np.zeros(shape=(n_geodesic_interpolations + 1, interpolation_degree + 1))
+        for i in range(n_geodesic_interpolations + 1):
             for j in range(interpolation_degree + 1):
-                interpolation_matrix_entries[i, j] = (float(i) / no_geodesic_interpolations) ** j
+                interpolation_matrix_entries[i, j] = (float(i) / n_geodesic_interpolations) ** j
         interpolation_matrix = tf.constant(interpolation_matrix_entries,
-                                           shape=(no_geodesic_interpolations + 1, interpolation_degree + 1),
+                                           shape=(n_geodesic_interpolations + 1, interpolation_degree + 1),
                                            dtype='float32')
 
         geodesic_points_in_z_matrix = tf.matmul(
@@ -38,7 +44,7 @@ def parametrize_curve(z_start, z_end, interpolation_degree, no_geodesic_interpol
             tf.transpose(interpolation_matrix, perm=[1, 0]))
 
         geodesic_points_in_z_t = tf.reshape(geodesic_points_in_z_matrix,
-                                            shape=[n_geodesics, dim_latent, no_geodesic_interpolations + 1])
+                                            shape=[n_geodesics, dim_latent, n_geodesic_interpolations + 1])
         geodesic_points_in_z = tf.transpose(geodesic_points_in_z_t, perm=[2, 1, 0])
 
         return geodesic_points_in_z
@@ -62,8 +68,9 @@ curves_in_sample_space = tf.transpose(tf.reshape(curves_in_sample_space_vectoriz
 
 diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
 
+denominator = tf.clip_by_value(disc_values_curves_sample_space[1:,:], 1e-3,1.)
 
-objective_vector_proposed = tf.divide(diff_square_vector, disc_values_curves_sample_space[1:,:])
+objective_vector_proposed = tf.divide(diff_square_vector, denominator)
 objective_vector_Jacobian = diff_square_vector
 
 if penalty == True:

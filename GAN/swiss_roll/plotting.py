@@ -119,7 +119,7 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
     plt.ylim(latent_min_value, latent_max_value)
 
 
-    plt.savefig('{}/geodesics_in_latent_space_{}.pdf'.format(log_directory_geodesics, method))
+    plt.savefig('{}/geodesics_in_latent_space_{}.png'.format(log_directory_geodesics, method))
 
 
 
@@ -134,7 +134,7 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
                     geodesics_in_sample_space[:, 1, k_geodesics], color='green', marker='.', s=4)
 
 
-    plt.savefig('{}/geodesics_in_sample_space_{}.pdf'.format(log_directory_geodesics, method))
+    plt.savefig('{}/geodesics_in_sample_space_{}.png'.format(log_directory_geodesics, method))
 
     return None
 

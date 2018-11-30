@@ -24,6 +24,20 @@ def initialize_endpoints_of_curve(initialization_mode):
 
         z_start_value = np.zeros( [1, dim_latent, n_geodesics]).astype(
             'float32')
+        y_axis = np.linspace(latent_min_value, latent_max_value, n_geodesics)
+        x_axis = np.ones(n_geodesics)
+        z_start_value[0,0,:]=latent_min_value*x_axis
+        z_start_value[0,1,:]=y_axis
+
+        z_end_value = np.zeros([1, dim_latent, n_geodesics]).astype(
+            'float32')
+        z_end_value[0,0,:]=latent_max_value*x_axis
+        z_end_value[0,1,:]=y_axis
+
+    elif initialization_mode == "vertical_grid":
+
+        z_start_value = np.zeros( [1, dim_latent, n_geodesics]).astype(
+            'float32')
         x_axis = np.linspace(latent_min_value, latent_max_value, n_geodesics)
         y_axis = np.ones(n_geodesics)
         z_start_value[0,0,:]=x_axis
@@ -33,7 +47,6 @@ def initialize_endpoints_of_curve(initialization_mode):
             'float32')
         z_end_value[0,0,:]=x_axis
         z_end_value[0,1,:]= latent_max_value*y_axis
-
 
 
     else:

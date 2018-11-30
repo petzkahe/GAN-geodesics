@@ -38,10 +38,13 @@ def find_geodesics(method, start, end, sess, training):
             [curves_in_latent_space, curves_in_sample_space],
             feed_dict={z_start: start, z_end: end})
 
+    elif method == "linear":
 
+        _curves_in_latent_space_value, _curves_in_sample_space_value = sess.run(
+            [lines_in_latent_space, lines_in_sample_space],
+            feed_dict={z_start: start, z_end: end})
 
-    ##### Add methods here and in config
-
+   
 
     else:
         raise Exception("method {} unknown".format(method))
@@ -76,11 +79,16 @@ def compute_geodesics(latent_start, latent_end):
             ########### DELETE ME WHEN DONE CHECKING STUFF
             #############################################################
 
+            sampling_geodesic_coefficients = "uniform"
+
             _curves_in_latent_space_value, _curves_in_sample_space_value = session.run(
                 [curves_in_latent_space, curves_in_sample_space],
                 feed_dict={z_start: latent_start, z_end: latent_end})
 
             dict["before"] = [_curves_in_latent_space_value, _curves_in_sample_space_value]
+
+
+            sampling_geodesic_coefficients = "zeros"
 
             #################################################################
             #################################################################

@@ -1,7 +1,7 @@
 from GAN.swiss_roll.geodesic_graph import *
 
-def set_up_training(objective_Jacobian, objective_proposed):
 
+def set_up_training(objective_Jacobian, objective_proposed):
 
     train_Jacobian = tf.train.AdamOptimizer(
         learning_rate=learning_rate_geodesics,
@@ -50,17 +50,17 @@ def find_geodesics(method, start, end, sess, training):
     return _curves_in_latent_space_value, _curves_in_sample_space_value
 
 
-def create_sample_grid(_min, _max):
+def create_grid(_min, _max,_n):
 
     #  Creates a grid in sample space
-    x_grid = np.zeros((n_discriminator_grid, n_discriminator_grid, 2), dtype='float32')
-    x_grid[:, :, 0] = np.linspace(_min[0], _max[0], n_discriminator_grid)[:, None]
+    _grid = np.zeros((_n, _n, 2), dtype='float32')
+    _grid[:, :, 0] = np.linspace(_min[0], _max[0], _n)[:, None]
     # for zero: for any second entry linspace runs over first coordinate
-    x_grid[:, :, 1] = np.linspace(_min[1], _max[1], n_discriminator_grid)[None, :]
+    _grid[:, :, 1] = np.linspace(_min[1], _max[1], _n)[None, :]
     # for one: for any first entry linspace runs over second coordinate
-    x_grid = x_grid.reshape((-1, 2))  # gives list of points of all combinations
+    _grid_vectorized = _grid.reshape((-1, 2))  # gives list of points of all combinations
 
-    return x_grid
+    return _grid_vectorized
 
 
 ##################################################################################################
@@ -138,14 +138,19 @@ def compute_geodesics(latent_start, latent_end):
 
         suppl_dict = {}
 
-        sample_grid_vectorized = create_sample_grid(sample_grid_minima, sample_grid_maxima)
-
-        # Pass grid through Discriminator
+        # Calculate discriminator background for sample space 
+        sample_grid_vectorized = create_grid(sample_grid_minima, sample_grid_maxima,n_discriminator_grid_sample)
         [disc_values_over_sample_grid_vectorized] = session.run([disc_values_on_real], feed_dict={data_real: sample_grid_vectorized})
-
-        disc_values_over_sample_grid = disc_values_over_sample_grid_vectorized.reshape((n_discriminator_grid, n_discriminator_grid))
-
+        disc_values_over_sample_grid = disc_values_over_sample_grid_vectorized.reshape((n_discriminator_grid_sample, n_discriminator_grid_sample))
         suppl_dict["disc_values_over_sample_grid"] = disc_values_over_sample_grid
+
+
+        # Calculate discriminator background for latent space
+        latent_grid_vectorized = create_grid(latent_grid_minima, latent_grid_maxima,n_discriminator_grid_latent)
+        [disc_values_over_latent_grid_vectorized] = session.run([disc_values_on_generated], feed_dict={data_latent: latent_grid_vectorized})
+        disc_values_over_latent_grid = disc_values_over_latent_grid_vectorized.reshape((n_discriminator_grid_latent, n_discriminator_grid_latent))
+        suppl_dict["disc_values_over_latent_grid"] = disc_values_over_latent_grid
+
 
 
     return dict , suppl_dict

@@ -13,7 +13,7 @@ with tf.variable_scope("Geodesics"):
     if sampling_geodesic_coefficients == "zeros":
         coefficients_initializations = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics), dtype='float32')
     elif sampling_geodesic_coefficients == "uniform":
-        coefficients_initializations = np.random.uniform(-2.,2., size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
+        coefficients_initializations = np.random.uniform(-1,1 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
     else:
         raise Exception("sampling method {} for geodesic coefficients unknown".format(sampling_geodesic_coefficients))
 

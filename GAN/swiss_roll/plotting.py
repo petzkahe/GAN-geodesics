@@ -26,7 +26,7 @@ def plot_sample_space(batch_real_data, batch_generated_data, iteration_step):
 
 
 
-def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, method, disc_values_over_sample_grid):
+def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, method, suppl_dict):
 
 
 
@@ -112,7 +112,14 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
     # This plots the geodesics in latent space
 
 
+    disc_values_over_latent_grid = suppl_dict["disc_values_over_latent_grid"]
+
     plt.clf()
+
+    c = plt.pcolormesh(np.linspace(latent_grid_minima[0], latent_grid_maxima[0], n_discriminator_grid_latent),
+                   np.linspace(latent_grid_minima[1], latent_grid_maxima[1], n_discriminator_grid_latent),
+                   np.transpose(disc_values_over_latent_grid), cmap='gray')
+    plt.colorbar(c)
 
 
     for k_geodesics in range(n_geodesics):
@@ -120,8 +127,8 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
                     color='green', marker='.', s=4)
 
 
-    plt.xlim(latent_min_value, latent_max_value)
-    plt.ylim(latent_min_value, latent_max_value)
+    #plt.xlim(latent_min_value, latent_max_value)
+    #plt.ylim(latent_min_value, latent_max_value)
 
 
     plt.savefig('{}/geodesics_in_latent_space_{}.png'.format(log_directory_geodesics, method))
@@ -132,11 +139,12 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
 
     plt.clf()
 
+    disc_values_over_sample_grid = suppl_dict["disc_values_over_sample_grid"]
 
 
 
-    c = plt.pcolormesh(np.linspace(sample_grid_minima[0], sample_grid_maxima[0], n_discriminator_grid),
-                   np.linspace(sample_grid_minima[1], sample_grid_maxima[1], n_discriminator_grid),
+    c = plt.pcolormesh(np.linspace(sample_grid_minima[0], sample_grid_maxima[0], n_discriminator_grid_sample),
+                   np.linspace(sample_grid_minima[1], sample_grid_maxima[1], n_discriminator_grid_sample),
                    np.transpose(disc_values_over_sample_grid), cmap='gray')
     plt.colorbar(c)
 

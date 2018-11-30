@@ -21,6 +21,19 @@ def initialize_endpoints_of_curve(initialization_mode):
             'float32')
         z_end_value = np.random.uniform(low=latent_min_value, high=latent_max_value, size=[1, dim_latent, n_geodesics]).astype('float32')
 
+    elif initialization_mode == "repeat":
+
+        n_clusters = 1
+        n_repeats = n_geodesics/n_clusters
+
+        z_start_value = np.repeat(np.random.uniform(low=latent_min_value, high=latent_max_value,
+                                          size=[1, dim_latent, n_clusters]).astype(
+            'float32'),n_repeats,axis=2)
+        z_end_value = np.repeat(np.random.uniform(low=latent_min_value, high=latent_max_value,
+                                          size=[1, dim_latent, n_clusters]).astype(
+            'float32'),n_repeats,axis=2)
+
+
     elif initialization_mode == "horizontal_grid":
 
         z_start_value = np.zeros( [1, dim_latent, n_geodesics]).astype(

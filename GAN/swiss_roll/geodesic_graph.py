@@ -105,7 +105,7 @@ lines_in_sample_space = tf.transpose(tf.reshape(lines_in_sample_space_vectorized
 
 diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
 
-denominator = tf.clip_by_value(disc_values_curves_sample_space[1:,:], 1e-3,1.)
+denominator = tf.clip_by_value(disc_values_curves_sample_space[1:,:], 1e-5,1.)
 
 objective_vector_proposed = tf.divide(diff_square_vector, denominator)
 objective_vector_Jacobian = diff_square_vector

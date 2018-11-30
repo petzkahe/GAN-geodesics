@@ -6,7 +6,8 @@ from GAN.swiss_roll.plotting import plot_geodesic
 import os
 
 if os.path.exists(log_directory_geodesics):
-    raise Exception("The directory ({}) exists and should not be overwritten".format(log_directory_geodesics))
+    #raise Exception("The directory ({}) exists and should not be overwritten".format(log_directory_geodesics))
+    pass
 else:
     os.makedirs(log_directory_geodesics)
     print("Log directory for geodesics is set to {}".format(log_directory_geodesics))
@@ -63,7 +64,7 @@ generate_real_samples = generate_real_data()
 real_samples = generate_real_samples.__next__()
 
 
-geodesics_dict = compute_geodesics(z_start_values, z_end_values)
+geodesics_dict, suppl_dict = compute_geodesics(z_start_values, z_end_values)
 
 
 # returns a dictionary of results
@@ -71,10 +72,11 @@ geodesics_dict = compute_geodesics(z_start_values, z_end_values)
 # value =  a list of two things: curves_in_latent_space_value, curves_in_sample_space_value
 
 
+
 for method in methods:
     curves_in_latent_space_value, curves_in_sample_space_value = geodesics_dict[method]
 
-    plot_geodesic(real_samples, curves_in_latent_space_value, curves_in_sample_space_value,method)
+    plot_geodesic(real_samples, curves_in_latent_space_value, curves_in_sample_space_value,method,suppl_dict["disc_values_over_sample_grid"])
 
 
 #######################################################3333
@@ -83,7 +85,7 @@ for method in methods:
 
 curves_in_latent_space_value, curves_in_sample_space_value = geodesics_dict["before"]
 
-plot_geodesic(real_samples, curves_in_latent_space_value, curves_in_sample_space_value,"before")
+plot_geodesic(real_samples, curves_in_latent_space_value, curves_in_sample_space_value,"before",suppl_dict["disc_values_over_sample_grid"])
 
 ############################################################
 ################################################################

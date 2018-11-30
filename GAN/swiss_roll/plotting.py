@@ -1,4 +1,5 @@
 import matplotlib
+import numpy as np
 
 matplotlib.use('pdf')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot
 import matplotlib.pyplot as plt
@@ -25,15 +26,15 @@ def plot_sample_space(batch_real_data, batch_generated_data, iteration_step):
 
 
 
-def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, method):
+def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, method, disc_values_over_sample_grid):
 
 
 
     # #  Creates fakes for 64^2 many uniformly distributed images
-    # points = np.zeros((no_visualization_points, no_visualization_points, 2), dtype='float32')
-    # points[:, :, 0] = np.linspace(min_value, max_value, no_visualization_points)[:,None]
+    # points = np.zeros((n_discriminator_grid, n_discriminator_grid, 2), dtype='float32')
+    # points[:, :, 0] = np.linspace(min_value, max_value, n_discriminator_grid)[:,None]
     # # for zero: for any second entry linspace runs over first coordinate
-    # points[:, :, 1] = np.linspace(min_value, max_value, no_visualization_points)[None,:]
+    # points[:, :, 1] = np.linspace(min_value, max_value, n_discriminator_grid)[None,:]
     # # for one: for any first entry linspace runs over second coordinate
     # points = points.reshape((-1, 2))  # gives list of points of all combinations
     #
@@ -51,20 +52,20 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
     # plt.clf()  # clear current figure
     #
     # #  Creates a grid in sample space
-    # x_grid = np.zeros((no_visualization_points, no_visualization_points, 2), dtype='float32')
-    # x_grid[:, :, 0] = np.linspace(-2., 2., no_visualization_points)[:,None]
+    # x_grid = np.zeros((n_discriminator_grid, n_discriminator_grid, 2), dtype='float32')
+    # x_grid[:, :, 0] = np.linspace(-2., 2., n_discriminator_grid)[:,None]
     # # for zero: for any second entry linspace runs over first coordinate
-    # x_grid[:, :, 1] = np.linspace(-2., 2., no_visualization_points)[None,:]
+    # x_grid[:, :, 1] = np.linspace(-2., 2., n_discriminator_grid)[None,:]
     # # for one: for any first entry linspace runs over second coordinate
     # x_grid = x_grid.reshape((-1, 2))  # gives list of points of all combinations
     #
     # # Pass grid through Discriminator
     # [disc_over_x] = session.run([critic_real], feed_dict={reals:x_grid})
     #
-    # disc_over_x=disc_over_x.reshape((no_visualization_points, no_visualization_points))
+    # disc_over_x=disc_over_x.reshape((n_discriminator_grid, n_discriminator_grid))
     #
-    # c = plt.pcolormesh(np.linspace(-2., 2., no_visualization_points),
-    #                np.linspace(-2., 2., no_visualization_points),
+    # c = plt.pcolormesh(np.linspace(-2., 2., n_discriminator_grid),
+    #                np.linspace(-2., 2., n_discriminator_grid),
     #                np.transpose(disc_over_x), cmap='gray')
     # plt.colorbar(c)
     #
@@ -83,9 +84,9 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
 
     ## Plot geodesics in latent space
 
-    # metric_measure_on_fakes = np.zeros(no_visualization_points ** 2)
+    # metric_measure_on_fakes = np.zeros(n_discriminator_grid ** 2)
     #
-    # for i in range(0, no_visualization_points ** 2):
+    # for i in range(0, n_discriminator_grid ** 2):
     #     _, critic_fake_out, metric_measure_on_fakes[i] = session.run(
     #         [fakes, critic_fake, determinant_metric],
     #         feed_dict={noise: points[i, :].reshape(1, 2)})
@@ -99,13 +100,17 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
     # plt.pcolormesh([points[:, 0], points[:, 1]],critic_value_on_fake)
     # ax.plot_surface(points[:, 0], points[:, 1],critic_value_on_fake, cmap=cm.coolwarm,
     #                       linewidth=0, antialiased=False)
-    # c = plt.pcolormesh(np.linspace(min_value, max_value, no_visualization_points), np.linspace(min_value, max_value, no_visualization_points),
-    #                np.transpose(metric_measure_on_fakes.reshape((no_visualization_points, no_visualization_points))),cmap='gray')
+    # c = plt.pcolormesh(np.linspace(min_value, max_value, n_discriminator_grid), np.linspace(min_value, max_value, n_discriminator_grid),
+    #                np.transpose(metric_measure_on_fakes.reshape((n_discriminator_grid, n_discriminator_grid))),cmap='gray')
     # plt.colorbar(c)
     # # plt.scatter(points[:, 0], points[:, 1],critic_value_on_fake, c='green', marker='+')
 
 
     # plt.scatter(samples_real[:, 0], samples_real[:, 1], c='orange', marker='+')
+
+
+    # This plots the geodesics in latent space
+
 
     plt.clf()
 
@@ -123,9 +128,20 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
 
 
 
-
+    # This plots the geodesics in sample space
 
     plt.clf()
+
+
+
+
+    c = plt.pcolormesh(np.linspace(sample_grid_minima[0], sample_grid_maxima[0], n_discriminator_grid),
+                   np.linspace(sample_grid_minima[1], sample_grid_maxima[1], n_discriminator_grid),
+                   np.transpose(disc_values_over_sample_grid), cmap='gray')
+    plt.colorbar(c)
+
+
+
 
     plt.scatter(samples_real[:, 0], samples_real[:, 1], c='orange', marker='+')
 

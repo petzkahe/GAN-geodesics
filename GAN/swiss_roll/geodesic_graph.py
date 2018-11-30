@@ -21,12 +21,32 @@ with tf.variable_scope("Geodesics"):
 
 
 def parametrize_line(z_start, z_end, n_geodesic_interpolations):
+    constant_part = tf.reshape(z_start, shape=(1, dim_latent, n_geodesics))
 
-    _lines = tf.constant(np.zeros((n_geodesic_interpolations+1,dim_latent,n_geodesics)))
-    #for t in range(n_geodesic_interpolations+1):
-    #    tf.assign(_lines[t,:,:],t/(n_geodesic_interpolations+1)*z_start + \
-    #                                       (1-t/(n_geodesic_interpolations+1))*z_end)
-    return _lines
+    linear_part = tf.reshape(z_end, shape=(1, dim_latent, n_geodesics)) - tf.reshape(z_start, shape=(
+        1, dim_latent, n_geodesics))
+
+    coefficients_vector = tf.concat([constant_part, linear_part], axis=0)
+
+    interpolation_matrix_entries = np.zeros(shape=(n_geodesic_interpolations + 1, 2))
+    for i in range(n_geodesic_interpolations + 1):
+        for j in range(2):
+            interpolation_matrix_entries[i, j] = (float(i) / n_geodesic_interpolations) ** j
+    interpolation_matrix = tf.constant(interpolation_matrix_entries,
+                                       shape=(n_geodesic_interpolations + 1, 2),
+                                       dtype='float32')
+
+    geodesic_points_in_z_matrix = tf.matmul(
+        tf.reshape(tf.transpose(coefficients_vector, perm=[2, 1, 0]), shape=[-1, 2]),
+        tf.transpose(interpolation_matrix, perm=[1, 0]))
+
+    geodesic_points_in_z_t = tf.reshape(geodesic_points_in_z_matrix,
+                                        shape=[n_geodesics, dim_latent, n_geodesic_interpolations + 1])
+    geodesic_points_in_z = tf.transpose(geodesic_points_in_z_t, perm=[2, 1, 0])
+
+    return geodesic_points_in_z
+
+
 
 
 def parametrize_curve(z_start, z_end, interpolation_degree, n_geodesic_interpolations):
@@ -63,16 +83,16 @@ curves_in_latent_space = parametrize_curve(z_start, z_end, degree_polynomial_geo
 curves_in_latent_space_vectorized = tf.reshape(tf.transpose(curves_in_latent_space, perm=[2, 0, 1]),
                                                    shape=(n_geodesics * (n_interpolations_points_geodesic + 1), dim_latent))
 
-#lines_in_latent_space = parametrize_line(z_start,z_end,n_interpolations_points_geodesic)
-#lines_in_latent_space_vectorized = tf.reshape(tf.transpose(lines_in_latent_space, perm=[2, 0, 1]),
-#                                                   shape=(n_geodesics * (n_interpolations_points_geodesic + 1), dim_latent))
+lines_in_latent_space = parametrize_line(z_start,z_end,n_interpolations_points_geodesic)
+lines_in_latent_space_vectorized = tf.reshape(tf.transpose(lines_in_latent_space, perm=[2, 0, 1]),
+                                                   shape=(n_geodesics * (n_interpolations_points_geodesic + 1), dim_latent))
 
 
 with tf.variable_scope("GAN"):
     curves_in_sample_space_vectorized = Generator(curves_in_latent_space_vectorized)
     disc_values_curves_sample_space_vectorized = Discriminator(curves_in_sample_space_vectorized)
 
-    #lines_in_sample_space_vectorized = Generator(lines_in_latent_space_vectorized)
+    lines_in_sample_space_vectorized = Generator(lines_in_latent_space_vectorized)
     
 
 disc_values_curves_sample_space = tf.transpose(tf.reshape(disc_values_curves_sample_space_vectorized, shape=(n_geodesics, n_interpolations_points_geodesic + 1)), perm=(1, 0))
@@ -80,8 +100,8 @@ disc_values_curves_sample_space = tf.transpose(tf.reshape(disc_values_curves_sam
 curves_in_sample_space = tf.transpose(tf.reshape(curves_in_sample_space_vectorized, shape=(n_geodesics,n_interpolations_points_geodesic+ 1, dim_data)),
                                       perm = [1,2,0])
 
-#lines_in_sample_space = tf.transpose(tf.reshape(lines_in_sample_space_vectorized, shape=(n_geodesics,n_interpolations_points_geodesic+ 1, dim_data)),
-#                                      perm = [1,2,0])
+lines_in_sample_space = tf.transpose(tf.reshape(lines_in_sample_space_vectorized, shape=(n_geodesics,n_interpolations_points_geodesic+ 1, dim_data)),
+                                     perm = [1,2,0])
 
 diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
 

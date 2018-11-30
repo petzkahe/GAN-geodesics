@@ -39,10 +39,8 @@ def find_geodesics(method, start, end, sess, training):
             feed_dict={z_start: start, z_end: end})
 
     elif method == "linear":
-
         _curves_in_latent_space_value, _curves_in_sample_space_value = sess.run(
-            [lines_in_latent_space, lines_in_sample_space],
-            feed_dict={z_start: start, z_end: end})
+            [lines_in_latent_space, lines_in_sample_space], feed_dict={z_start: start, z_end: end})
 
    
 
@@ -50,6 +48,23 @@ def find_geodesics(method, start, end, sess, training):
         raise Exception("method {} unknown".format(method))
 
     return _curves_in_latent_space_value, _curves_in_sample_space_value
+
+
+def create_sample_grid(_min, _max):
+
+    #  Creates a grid in sample space
+    x_grid = np.zeros((n_discriminator_grid, n_discriminator_grid, 2), dtype='float32')
+    x_grid[:, :, 0] = np.linspace(_min[0], _max[0], n_discriminator_grid)[:, None]
+    # for zero: for any second entry linspace runs over first coordinate
+    x_grid[:, :, 1] = np.linspace(_min[1], _max[1], n_discriminator_grid)[None, :]
+    # for one: for any first entry linspace runs over second coordinate
+    x_grid = x_grid.reshape((-1, 2))  # gives list of points of all combinations
+
+    return x_grid
+
+
+##################################################################################################
+#########################################################################################################
 
 
 def compute_geodesics(latent_start, latent_end):
@@ -79,7 +94,6 @@ def compute_geodesics(latent_start, latent_end):
             ########### DELETE ME WHEN DONE CHECKING STUFF
             #############################################################
 
-            sampling_geodesic_coefficients = "uniform"
 
             _curves_in_latent_space_value, _curves_in_sample_space_value = session.run(
                 [curves_in_latent_space, curves_in_sample_space],
@@ -87,8 +101,6 @@ def compute_geodesics(latent_start, latent_end):
 
             dict["before"] = [_curves_in_latent_space_value, _curves_in_sample_space_value]
 
-
-            sampling_geodesic_coefficients = "zeros"
 
             #################################################################
             #################################################################
@@ -104,8 +116,16 @@ def compute_geodesics(latent_start, latent_end):
             elif method == "proposed":
 
                 curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start, latent_end,
+                                                                                            session, train_geodesic_proposed)
+
+            elif method == "linear":
+                curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start,
+                                                                                            latent_end,
                                                                                             session,
-                                                                                            train_geodesic_proposed)
+                                                                                            None)
+
+
+
             else:
                 raise Exception("method {} unknown".format(method))
 
@@ -116,7 +136,16 @@ def compute_geodesics(latent_start, latent_end):
             values = session.run(variables_names)
 
 
-        # session run of fakes = grid of latent points, gives fakes_sample_space, discriminator values, and possibly jacobian metric
-        # supplementary_dict = above stuff
+        suppl_dict = {}
 
-    return dict #, supplementary_dict
+        sample_grid_vectorized = create_sample_grid(sample_grid_minima, sample_grid_maxima)
+
+        # Pass grid through Discriminator
+        [disc_values_over_sample_grid_vectorized] = session.run([disc_values_on_real], feed_dict={data_real: sample_grid_vectorized})
+
+        disc_values_over_sample_grid = disc_values_over_sample_grid_vectorized.reshape((n_discriminator_grid, n_discriminator_grid))
+
+        suppl_dict["disc_values_over_sample_grid"] = disc_values_over_sample_grid
+
+
+    return dict , suppl_dict

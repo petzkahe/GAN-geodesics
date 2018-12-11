@@ -31,7 +31,7 @@ def parametrize_line(z_start, z_end, n_geodesic_interpolations):
     interpolation_matrix_entries = np.zeros(shape=(n_geodesic_interpolations + 1, 2))
     for i in range(n_geodesic_interpolations + 1):
         for j in range(2):
-            interpolation_matrix_entries[i, j] = (float(i) / n_geodesic_interpolations) ** j
+            interpolation_matrix_entries[i, j] = (float(i) / (n_geodesic_interpolations +1 ) ) ** j
     interpolation_matrix = tf.constant(interpolation_matrix_entries,
                                        shape=(n_geodesic_interpolations + 1, 2),
                                        dtype='float32')
@@ -63,9 +63,9 @@ def parametrize_curve(z_start, z_end, interpolation_degree, n_geodesic_interpola
         interpolation_matrix_entries = np.zeros(shape=(n_geodesic_interpolations + 1, interpolation_degree + 1))
         for i in range(n_geodesic_interpolations + 1):
             for j in range(interpolation_degree + 1):
-                interpolation_matrix_entries[i, j] = (float(i) / n_geodesic_interpolations) ** j
+                interpolation_matrix_entries[i, j] = (float(i) / (n_geodesic_interpolations + 1)) ** j
         interpolation_matrix = tf.constant(interpolation_matrix_entries,
-                                           shape=(n_geodesic_interpolations + 1, interpolation_degree + 1),
+                                            shape=(n_geodesic_interpolations + 1, interpolation_degree + 1),
                                            dtype='float32')
 
         geodesic_points_in_z_matrix = tf.matmul(
@@ -105,10 +105,15 @@ lines_in_sample_space = tf.transpose(tf.reshape(lines_in_sample_space_vectorized
 
 diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
 
-denominator = tf.clip_by_value(disc_values_curves_sample_space[1:,:], 1e-5,1.)
+denominator = tf.clip_by_value(disc_values_curves_sample_space[1:,:], 1e-1,1.)
+#denominator = tf.multiply(denominator,denominator)
 
-objective_vector_proposed = tf.divide(diff_square_vector, denominator)
+#objective_vector_proposed = tf.divide(1, denominator)
+objective_vector_proposed = tf.divide(diff_square_vector,denominator)
 objective_vector_Jacobian = diff_square_vector
+
+#if method == "proposed"
+
 
 if penalty == True:
     geodesic_penalty = tf.reduce_max(diff_square_vector)  # maximum of norm difference in sample space
@@ -119,3 +124,8 @@ else:
 
 geodesic_objective_function_proposed = tf.reduce_sum(objective_vector_proposed) + penalty_hyper_param * geodesic_penalty
 geodesic_objective_function_Jacobian = tf.reduce_sum(objective_vector_Jacobian) + penalty_hyper_param * geodesic_penalty
+
+tf.summary.scalar("geodesic_objective_function_proposed",geodesic_objective_function_proposed)
+
+
+

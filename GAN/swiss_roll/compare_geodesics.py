@@ -27,14 +27,16 @@ def initialize_endpoints_of_curve(initialization_mode):
             raise Exception("Please select {} such that it evenly divides {}").format(n_endpoint_clusters,n_geodesics)
         n_repeats = n_geodesics/n_endpoint_clusters
 
-        z_start_center = np.repeat(np.reshape(np.array([-0.75,-0.75]),(1,dim_latent,1)),\
-                                    n_endpoint_clusters,axis=2)
-        z_end_center = np.repeat(np.reshape(np.array([0.5,-0.75]),(1,dim_latent,1)),\
-                                    n_endpoint_clusters,axis=2)
+        # z_start_center = [-0.75,-0.75]
+        # z_end_center = [0.5,-0.75]
 
         sigma = 0.05
-        z_start_clusters = z_start_center + np.random.normal(0,sigma,(1,dim_latent,n_endpoint_clusters)).astype('float32')
-        z_end_clusters = z_end_center + np.random.normal(0,sigma,(1,dim_latent,n_endpoint_clusters)).astype('float32')
+        z_start_clusters = np.repeat(np.reshape(np.array(z_start_center),(1,dim_latent,1)),\
+                                    n_endpoint_clusters,axis=2) + \
+                            np.random.normal(0,sigma,(1,dim_latent,n_endpoint_clusters)).astype('float32')
+        z_end_clusters = np.repeat(np.reshape(np.array(z_end_center),(1,dim_latent,1)),\
+                                    n_endpoint_clusters,axis=2) + \
+                            np.random.normal(0,sigma,(1,dim_latent,n_endpoint_clusters)).astype('float32')
 
         z_start_value = np.repeat(z_start_clusters,n_repeats,axis=2)
         z_end_value = np.repeat(z_end_clusters,n_repeats,axis=2)

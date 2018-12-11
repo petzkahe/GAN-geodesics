@@ -3,32 +3,58 @@ from GAN.swiss_roll.geodesic_graph import *
 
 def set_up_training(objective_Jacobian, objective_proposed):
 
-    train_Jacobian = tf.train.AdamOptimizer(
-        learning_rate=learning_rate_geodesics,
-        beta1=0.5,
-        beta2=0.9
-    ).minimize(
-        objective_Jacobian,
-        var_list=coefficients
-    )
+    
 
-    train_proposed = tf.train.AdamOptimizer(
-        learning_rate=learning_rate_geodesics,
-        beta1=0.5,
-        beta2=0.9
-    ).minimize(
-        objective_proposed,
-        var_list=coefficients
-    )
+    train_Jacobian = tf.train.GradientDescentOptimizer(
+        learning_rate=learning_rate_geodesics
+        ).minimize(objective_Jacobian,var_list=coefficients)
+
+    train_proposed = tf.train.GradientDescentOptimizer(
+        learning_rate=learning_rate_geodesics
+        ).minimize(objective_proposed,var_list=coefficients)
+
+
+    # train_Jacobian = tf.train.AdamOptimizer(
+    #     learning_rate=learning_rate_geodesics,
+    #     beta1=adam_beta1,
+    #     beta2=adam_beta2
+    # ).minimize(
+    #     objective_Jacobian,
+    #     var_list=coefficients
+    # )
+
+    # train_proposed = tf.train.AdamOptimizer(
+    #     learning_rate=learning_rate_geodesics,
+    #     beta1=adam_beta1,
+    #     beta2=adam_beta2
+    # ).minimize(
+    #     objective_proposed,
+    #     var_list=coefficients
+    # )
 
 
     return train_Jacobian, train_proposed
 
 
 
-def find_geodesics(method, start, end, sess, training):
+def find_geodesics(method, start, end, sess, training,train_writer):
 
-    if method == "Jacobian" or  method=="proposed":
+    if method=="proposed":
+
+        for iteraton in range(n_train_iterations_geodesics):
+            if False:
+                merge = tf.summary.merge_all()
+                summary,_ = sess.run([merge,training], feed_dict={z_start : start, z_end: end})
+                train_writer.add_summary(summary, iteraton)
+            else:
+                _ = sess.run([training], feed_dict={z_start : start, z_end: end})
+                
+
+        _curves_in_latent_space_value, _curves_in_sample_space_value = sess.run(
+            [curves_in_latent_space, curves_in_sample_space],
+            feed_dict={z_start: start, z_end: end})
+
+    elif method == "Jacobian":
 
         for iteraton in range(n_train_iterations_geodesics):
             _ = sess.run([training], feed_dict={z_start : start, z_end: end})
@@ -41,9 +67,7 @@ def find_geodesics(method, start, end, sess, training):
     elif method == "linear":
         _curves_in_latent_space_value, _curves_in_sample_space_value = sess.run(
             [lines_in_latent_space, lines_in_sample_space], feed_dict={z_start: start, z_end: end})
-
-   
-
+    
     else:
         raise Exception("method {} unknown".format(method))
 
@@ -110,19 +134,19 @@ def compute_geodesics(latent_start, latent_end):
 
 
             if method == "Jacobian":
-
-                curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian)
+                curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian,None)
 
             elif method == "proposed":
-
+                train_writer  =  tf.summary.FileWriter( './graphs',session.graph)
                 curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start, latent_end,
-                                                                                            session, train_geodesic_proposed)
+                                                                                            session, train_geodesic_proposed,train_writer)
 
+                
             elif method == "linear":
                 curves_in_latent_space_value, curves_in_sample_space_value = find_geodesics(method, latent_start,
                                                                                             latent_end,
                                                                                             session,
-                                                                                            None)
+                                                                                            None,None)
 
 
 

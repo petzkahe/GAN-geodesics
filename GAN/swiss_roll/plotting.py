@@ -24,6 +24,28 @@ def plot_sample_space(batch_real_data, batch_generated_data, iteration_step):
     return None
 
 
+def plot_loss_surface(_dict):
+
+    loss_surface_proposed = _dict['loss_surface_proposed'] 
+    loss_surface_Jacobian = _dict['loss_surface_Jacobian'] 
+
+    xyaxis = np.linspace(coefficient_range[0], coefficient_range[1], n_loss_grid)
+
+    plt.clf()
+
+    c = plt.pcolormesh(xyaxis,xyaxis, np.transpose(np.log(loss_surface_proposed+1e-8)), cmap='gray')
+    plt.colorbar(c)
+
+    plt.savefig('{}/loss_surface_proposed.png'.format(log_directory_geodesics))
+
+    
+    plt.clf()
+
+    c = plt.pcolormesh(xyaxis,xyaxis, np.transpose(np.log(loss_surface_Jacobian+1e-8)), cmap='gray')
+    plt.colorbar(c)
+
+    plt.savefig('{}/loss_surface_Jacobian.png'.format(log_directory_geodesics))
+
 
 
 def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, method, suppl_dict):
@@ -122,10 +144,12 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
     plt.colorbar(c)
 
 
-    for k_geodesics in range(n_geodesics):
+    for k_geodesics in range(1,n_geodesics):
         plt.scatter(geodesics_in_latent[:, 0, k_geodesics], geodesics_in_latent[:, 1, k_geodesics],
                     color='green', marker='.', s=4)
-
+    plt.scatter(geodesics_in_latent[:, 0, 0], geodesics_in_latent[:, 1, 0],
+                    color='yellow', marker='.', s=4)
+    
 
     #plt.xlim(latent_min_value, latent_max_value)
     #plt.ylim(latent_min_value, latent_max_value)
@@ -153,9 +177,10 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
 
     plt.scatter(samples_real[:, 0], samples_real[:, 1], c='orange', marker='+')
 
-    for k_geodesics in range(n_geodesics):
+    for k_geodesics in range(1,n_geodesics):
         plt.scatter(geodesics_in_sample_space[:, 0, k_geodesics],
                     geodesics_in_sample_space[:, 1, k_geodesics], color='green', marker='.', s=4)
+    plt.scatter(geodesics_in_sample_space[:, 0, 0], geodesics_in_sample_space[:, 1, 0], color='yellow', marker='.', s=4)
 
 
     plt.savefig('{}/geodesics_in_sample_space_{}.png'.format(log_directory_geodesics, method))

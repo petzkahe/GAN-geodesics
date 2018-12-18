@@ -31,6 +31,15 @@ sampling_geodesic_coefficients = "uniform"
 # sampling_geodesic_coefficients = "zeros"
 
 
+n_batch_size_curve_net = 128
+dim_nn_curve_net = 2*(n_interpolations_points_geodesic-1)
+
+
+
+
+
+
+
 penalty = False
 
 log_directory_geodesics = 'logs_geo'

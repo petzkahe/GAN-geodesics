@@ -14,11 +14,9 @@ else:
     print( "Log directory for geodesics is set to {}".format( log_directory_geodesics ) )
 
 
-# def initialize_endpoints_of_curve(initialization_mode):
-#     if initialization_mode == "random":
-
-#         z_in_value = np.random.uniform( low=latent_min_value, high=latent_max_value,
-#                                            size=[n_batch_size_curve_net,2*dim_latent] ).astype('float32' )
+def initialize_endpoints_of_curve(initialization_mode):
+    if initialization_mode == "random":
+        z_in_value = np.random.uniform( low=latent_min_value, high=latent_max_value, size=[n_batch_size_curve_net,2*dim_latent] ).astype('float32' )
 
 
 
@@ -133,10 +131,10 @@ else:
     #     z_end_value[0, 0, :] = x_axis
     #     z_end_value[0, 1, :] = latent_max_value * y_axis
 
-    # else:
-    #     raise Exception( "Initialization_mode {} not known".format( initialization_mode ) )
+    else:
+        raise Exception( "Initialization_mode {} not known".format( initialization_mode ) )
 
-    # return z_in_value
+    return z_in_value
 
 
 def sort_geodesics(_geodesics_dict):
@@ -150,13 +148,12 @@ def sort_geodesics(_geodesics_dict):
             _geodesics_dict[method] = _curves_in_latent_space_value, _curves_in_sample_space_value, _objective_values
     return _geodesics_dict
 
+z_in = initialize_endpoints_of_curve(endpoint_initialization_mode)
 
-z_in_values = initialize_endpoints_of_curve( endpoint_initialization_mode )
 generate_real_samples = generate_real_data()
 real_samples = generate_real_samples.__next__()
 
-geodesics_dict, suppl_dict = compute_geodesics_nn( z_in_values )
-
+geodesics_dict, suppl_dict = compute_geodesics_nn(z_in)
 # function which compares local minimas. outputs sorted list of geodesics according to loss
 if n_endpoint_clusters == 1:
     geodesics_dict = sort_geodesics( geodesics_dict )

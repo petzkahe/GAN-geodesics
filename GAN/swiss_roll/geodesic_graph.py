@@ -135,16 +135,21 @@ lines_in_sample_space = tf.transpose(tf.reshape(lines_in_sample_space_vectorized
 diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
 diff_square_vector_latent = tf.reduce_sum(tf.square(curves_in_latent_space[1:, :, :] - curves_in_latent_space[:-1, :, :]), axis=1)
 
-small_eps = 0.1
-denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space[1:,:],small_eps), small_eps,.5+small_eps)
+small_eps = 0.01
+
+if True:
+    disc_values_curves_sample_space = tf.exp(tf.multiply(0.5,tf.add(tf.log(disc_values_curves_sample_space[1:,:]),tf.log(disc_values_curves_sample_space[:-1,:]))))
+    denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space,small_eps), small_eps,0.4+small_eps)
+else:
+    denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space[1:,:],small_eps), small_eps,0.4+small_eps)
 
 #denominator = tf.Print(denominator,[denominator])
 
 
-#denominator = tf.multiply(denominator,denominator)
+denominator = tf.multiply(denominator,denominator)
 
 #objective_vector_proposed = tf.divide(1, denominator)
-objective_vector_proposed = tf.divide(diff_square_vector_latent, denominator)
+#objective_vector_proposed = tf.divide(diff_square_vector_latent, denominator)
 
 objective_vector_proposed = tf.divide(diff_square_vector,denominator)
 

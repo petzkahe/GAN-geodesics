@@ -1,14 +1,14 @@
 methods = ["linear", "Jacobian", "proposed"]
 
 learning_rate_geodesics = 1e-2
-adam_beta1 = 0.9
-adam_beta2 = 0.99
+adam_beta1 = 0.5
+adam_beta2 = 0.9
 
 n_train_iterations_geodesics = 3000
 
-n_geodesics = 10
-n_interpolations_points_geodesic = 512  # 128 # or 1024??
-degree_polynomial_geodesic_latent = 6
+n_geodesics = 50
+n_interpolations_points_geodesic = 1024  # 128 # or 1024??
+degree_polynomial_geodesic_latent = 4
 
 n_discriminator_grid_sample = 128
 sample_grid_minima = [-3., -3.]
@@ -39,6 +39,7 @@ do_shared_variables = False
 do_no_training = False
 
 do_loss_surface = False
+#do_loss_surface = True
 
 if do_loss_surface:
     sampling_geodesic_coefficients = "grid"

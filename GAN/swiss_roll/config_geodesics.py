@@ -18,7 +18,7 @@ n_discriminator_grid_latent = 512
 latent_grid_minima = [-2., -3.]
 latent_grid_maxima = [3., 2.]
 
-endpoint_initialization_mode = "custom"
+endpoint_initialization_mode = "random"
 # z_start_center = [-0.75,-0.75]
 # z_end_center = [0.5,-0.75]
 z_start_center = [-0.5, 0]

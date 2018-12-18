@@ -206,4 +206,4 @@ def compute_geodesics_nn(latent_start_end):
 
 
 
-    return dict , suppl_dict
+    return dict, suppl_dict

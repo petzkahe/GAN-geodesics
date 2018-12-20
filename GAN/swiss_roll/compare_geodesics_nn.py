@@ -174,5 +174,5 @@ for method in methods:
     print(qq)
     plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, method, suppl_dict )
 
-curves_in_latent_space_value, curves_in_sample_space_value = geodesics_dict["before"]
-plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, "before", suppl_dict )
+#curves_in_latent_space_value, curves_in_sample_space_value = geodesics_dict["before"]
+#plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, "before", suppl_dict )

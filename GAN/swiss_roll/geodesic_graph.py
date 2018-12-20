@@ -13,7 +13,7 @@ with tf.variable_scope("Geodesics"):
     if sampling_geodesic_coefficients == "zeros":
         coefficients_initializations = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics), dtype='float32')
     elif sampling_geodesic_coefficients == "uniform":
-        coefficients_initializations = np.random.uniform(-2,2 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
+        coefficients_initializations = np.random.uniform(-4,4 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
     elif sampling_geodesic_coefficients == "grid":
 
         tmp_grid = np.zeros((n_loss_grid, n_loss_grid, 2), dtype='float32')
@@ -135,6 +135,10 @@ lines_in_sample_space = tf.transpose(tf.reshape(lines_in_sample_space_vectorized
 diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
 diff_square_vector_latent = tf.reduce_sum(tf.square(curves_in_latent_space[1:, :, :] - curves_in_latent_space[:-1, :, :]), axis=1)
 
+
+# penalty for leaving domain 
+out_of_domain_penalty = tf.add(tf.exp( tf.clip_by_value(tf.add(tf.abs(curves_in_latent_space),-1),0,np.infty)),-1)
+
 small_eps = 0.01
 
 if True:
@@ -167,14 +171,16 @@ else:
 
 geodesic_objective_per_geodesic_proposed = tf.reduce_sum(objective_vector_proposed,axis=0) 
 #geodesic_objective_per_geodesic_proposed = tf.Print(geodesic_objective_per_geodesic_proposed,[geodesic_objective_per_geodesic_proposed])
-geodesic_objective_function_proposed = tf.reduce_sum(geodesic_objective_per_geodesic_proposed) + penalty_hyper_param * geodesic_penalty
+geodesic_objective_function_proposed = tf.reduce_sum(geodesic_objective_per_geodesic_proposed) + penalty_hyper_param * geodesic_penalty \
+                                        + tf.reduce_sum(out_of_domain_penalty)
 #geodesic_objective_function_proposed = tf.Print(geodesic_objective_function_proposed,[geodesic_objective_function_proposed])
 
 #geodesic_objective_function_proposed = tf.reduce_sum(geodesic_objective_function_proposed) + penalty_hyper_param * geodesic_penalty
 
 geodesic_objective_per_geodesic_Jacobian = tf.reduce_sum(objective_vector_Jacobian,axis=0) 
 #geodesic_objective_per_geodesic_Jacobian = tf.Print(geodesic_objective_per_geodesic_Jacobian,[geodesic_objective_per_geodesic_Jacobian])
-geodesic_objective_function_Jacobian = tf.reduce_sum(geodesic_objective_per_geodesic_Jacobian) + penalty_hyper_param * geodesic_penalty
+geodesic_objective_function_Jacobian = tf.reduce_sum(geodesic_objective_per_geodesic_Jacobian) + penalty_hyper_param * geodesic_penalty \
+                                        + tf.reduce_sum(out_of_domain_penalty)
 #geodesic_objective_function_Jacobian = tf.reduce_sum(geodesic_objective_function_Jacobian) + penalty_hyper_param * geodesic_penalty
 
 

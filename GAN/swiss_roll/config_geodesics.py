@@ -4,9 +4,9 @@ learning_rate_geodesics = 1e-2
 adam_beta1 = 0.5
 adam_beta2 = 0.9
 
-n_train_iterations_geodesics = 3000
+n_train_iterations_geodesics = 5000
 
-n_geodesics = 50
+n_geodesics = 10
 n_interpolations_points_geodesic = 1024  # 128 # or 1024??
 degree_polynomial_geodesic_latent = 4
 
@@ -18,7 +18,7 @@ n_discriminator_grid_latent = 512
 latent_grid_minima = [-2., -3.]
 latent_grid_maxima = [3., 2.]
 
-endpoint_initialization_mode = "random"
+endpoint_initialization_mode = "custom"
 # z_start_center = [-0.75,-0.75]
 # z_end_center = [0.5,-0.75]
 z_start_center = [-0.5, 0]

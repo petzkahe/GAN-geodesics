@@ -112,7 +112,7 @@ def compute_geodesics(latent_start, latent_end):
         if do_no_training:
             session.run(tf.global_variables_initializer())
 
-            model_saver.restore(session, tf.train.latest_checkpoint('trained_model/'))
+            model_saver.restore(session, tf.train.latest_checkpoint('../../trained_model/'))
 
             # calculate loss function for each initial variable value on grid and return
 
@@ -135,7 +135,7 @@ def compute_geodesics(latent_start, latent_end):
             for method in methods:
                 session.run(tf.global_variables_initializer())
 
-                model_saver.restore(session, tf.train.latest_checkpoint('trained_model/'))
+                model_saver.restore(session, tf.train.latest_checkpoint('../../trained_model/'))
 
                 #######################################################3333
                 ########### DELETE ME WHEN DONE CHECKING STUFF

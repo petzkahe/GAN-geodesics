@@ -1,14 +1,14 @@
 methods = ["linear", "Jacobian", "proposed"]
 
-learning_rate_geodesics = 1e-2
+learning_rate_geodesics = 1e-3
 adam_beta1 = 0.5
 adam_beta2 = 0.9
 
-n_train_iterations_geodesics = 5000
+n_train_iterations_geodesics = 2000
 
-n_geodesics = 10
+n_geodesics = 20
 n_interpolations_points_geodesic = 1024  # 128 # or 1024??
-degree_polynomial_geodesic_latent = 4
+degree_polynomial_geodesic_latent = 6
 
 n_discriminator_grid_sample = 128
 sample_grid_minima = [-3., -3.]

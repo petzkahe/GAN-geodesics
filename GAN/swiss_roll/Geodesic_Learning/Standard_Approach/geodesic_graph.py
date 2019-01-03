@@ -13,7 +13,7 @@ with tf.variable_scope("Geodesics"):
     if sampling_geodesic_coefficients == "zeros":
         coefficients_initializations = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics), dtype='float32')
     elif sampling_geodesic_coefficients == "uniform":
-        coefficients_initializations = np.random.uniform(-4,4 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
+        coefficients_initializations = np.random.uniform(-0.01,0.01 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
     elif sampling_geodesic_coefficients == "grid":
 
         tmp_grid = np.zeros((n_loss_grid, n_loss_grid, 2), dtype='float32')
@@ -29,16 +29,7 @@ with tf.variable_scope("Geodesics"):
         raise Exception("sampling method {} for geodesic coefficients unknown".format(sampling_geodesic_coefficients))
 
     
-
-    if do_shared_variables:
-    ###########
-        zero_init = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, 1),dtype='float32')
-        coefficients = tf.Variable(initial_value=zero_init, name='coefficients')
-        coefficients_offset = tf.constant(coefficients_initializations)
-        coefficients_shared = tf.add(tf.tile(coefficients,(1,1,n_geodesics)),coefficients_offset)
-    ##############
-    else:
-        coefficients = tf.Variable(initial_value=coefficients_initializations, name='coefficients')
+    coefficients = tf.Variable(initial_value=coefficients_initializations, name='coefficients')
     
 def parametrize_line(z_start, z_end, n_geodesic_interpolations):
     constant_part = tf.reshape(z_start, shape=(1, dim_latent, n_geodesics))
@@ -71,32 +62,64 @@ def parametrize_line(z_start, z_end, n_geodesic_interpolations):
 
 def parametrize_curve(z_start, z_end, interpolation_degree, n_geodesic_interpolations):
 
-        constant_part = tf.reshape(z_start, shape=(1, dim_latent, n_geodesics))
-        
-        if do_shared_variables:
-            linear_part = tf.reshape(z_end, shape=(1, dim_latent, n_geodesics)) - tf.reshape(z_start, shape=(
-                1, dim_latent, n_geodesics)) - tf.reshape(tf.reduce_sum(coefficients_shared,
-                                                                     axis=0), shape=(1, dim_latent, n_geodesics))
-            print(1)
-            coefficients_vector = tf.concat([constant_part, linear_part, coefficients_shared], axis=0)
-        
-        else:
-            linear_part = tf.reshape(z_end, shape=(1, dim_latent, n_geodesics)) - tf.reshape(z_start, shape=(
-                1, dim_latent, n_geodesics)) - tf.reshape(tf.reduce_sum(coefficients,
-                                                                     axis=0), shape=(1, dim_latent, n_geodesics))
+        factor1 = [2.0**i-1.0 for i in range(2,degree_polynomial_geodesic_latent+1)]
+        factor1_tensor = tf.reshape(tf.constant(factor1), shape =(degree_polynomial_geodesic_latent-1,1,1))
+        factor2 = [2.0 ** i - 2.0 for i in range( 2, degree_polynomial_geodesic_latent + 1 )]
+        factor2_tensor = tf.reshape(tf.constant(factor2), shape =(degree_polynomial_geodesic_latent-1,1,1))
 
-            coefficients_vector = tf.concat([constant_part, linear_part, coefficients], axis=0)
+        linear_part = tf.reshape(z_end, shape=(1, dim_latent, n_geodesics)) - tf.reshape(z_start, shape=(1, dim_latent, n_geodesics)) - tf.reshape(tf.reduce_sum(tf.multiply(factor1_tensor,coefficients),axis=0), shape=(1, dim_latent, n_geodesics))
+
+        constant_part = 2*tf.reshape(z_start, shape=(1, dim_latent, n_geodesics)) - tf.reshape(z_end, shape=(1, dim_latent, n_geodesics)) + tf.reshape(tf.reduce_sum(tf.multiply(factor2_tensor,coefficients),axis=0), shape=(1, dim_latent, n_geodesics))
+
+
+        coefficients_vector = tf.concat([constant_part, linear_part, coefficients], axis=0)
         
         # Initialize parameter variable of size interpolation_degree times dimensions_noise space
 
         interpolation_matrix_entries = np.zeros(shape=(n_geodesic_interpolations + 1, interpolation_degree + 1))
         for i in range(n_geodesic_interpolations + 1):
             for j in range(interpolation_degree + 1):
-                interpolation_matrix_entries[i, j] = (float(i) / (n_geodesic_interpolations + 1)) ** j
+                interpolation_matrix_entries[i, j] = (1.0+float(i) / (n_geodesic_interpolations + 1)) ** j
         interpolation_matrix = tf.constant(interpolation_matrix_entries,
                                             shape=(n_geodesic_interpolations + 1, interpolation_degree + 1),
                                            dtype='float32')
 
+
+        ##############################################3
+        ###### For polynomials on domaint in [0,1] -- old version
+        #################################################
+
+        # constant_part = tf.reshape( z_start, shape=(1, dim_latent, n_geodesics) )
+        #
+        # if do_shared_variables:
+        #     linear_part = tf.reshape( z_end, shape=(1, dim_latent, n_geodesics) ) - tf.reshape( z_start, shape=(
+        #         1, dim_latent, n_geodesics) ) - tf.reshape( tf.reduce_sum( coefficients_shared,
+        #                                                                    axis=0 ),
+        #                                                     shape=(1, dim_latent, n_geodesics) )
+        #     print( 1 )
+        #     coefficients_vector = tf.concat( [constant_part, linear_part, coefficients_shared], axis=0 )
+        #
+        # else:
+        #     linear_part = tf.reshape( z_end, shape=(1, dim_latent, n_geodesics) ) - tf.reshape( z_start, shape=(
+        #         1, dim_latent, n_geodesics) ) - tf.reshape( tf.reduce_sum( coefficients,
+        #                                                                    axis=0 ),
+        #                                                     shape=(1, dim_latent, n_geodesics) )
+        #
+        #     coefficients_vector = tf.concat( [constant_part, linear_part, coefficients], axis=0 )
+        #
+        # # Initialize parameter variable of size interpolation_degree times dimensions_noise space
+        #
+        # interpolation_matrix_entries = np.zeros( shape=(n_geodesic_interpolations + 1, interpolation_degree + 1) )
+        # for i in range( n_geodesic_interpolations + 1 ):
+        #     for j in range( interpolation_degree + 1 ):
+        #         interpolation_matrix_entries[i, j] = (float( i ) / (n_geodesic_interpolations + 1)) ** j
+        # interpolation_matrix = tf.constant( interpolation_matrix_entries,
+        #                                     shape=(n_geodesic_interpolations + 1, interpolation_degree + 1),
+        #                                     dtype='float32' )
+        #######################################################################################################33
+        #############################################################################################################
+
+        
         geodesic_points_in_z_matrix = tf.matmul(
             tf.reshape(tf.transpose(coefficients_vector, perm=[2, 1, 0]), shape=[-1, interpolation_degree + 1]),
             tf.transpose(interpolation_matrix, perm=[1, 0]))

@@ -1,8 +1,8 @@
 import os
 import sys
-from GAN.swiss_roll.GAN_graph import *
-from GAN.swiss_roll.generate_data import *
-from GAN.swiss_roll.plotting import plot_sample_space
+from GAN.swiss_roll.GAN_Learning.GAN_graph import *
+from GAN.swiss_roll.utils.generate_data import *
+from GAN.swiss_roll.utils.plotting import plot_sample_space
 
 sys.path.append(os.getcwd())
 # sys.path = A list of strings that specifies the search path for modules.

@@ -1,8 +1,8 @@
-from GAN.swiss_roll.config_geodesics import *
-from GAN.swiss_roll.generate_data import *
-from GAN.swiss_roll.compute_geodesics import compute_geodesics
-from GAN.swiss_roll.plotting import plot_geodesic
-from GAN.swiss_roll.plotting import plot_loss_surface
+from GAN.swiss_roll.Geodesic_Learning.Standard_Approach.config_geodesics import *
+from GAN.swiss_roll.utils.generate_data import *
+from GAN.swiss_roll.Geodesic_Learning.Standard_Approach.compute_geodesics import compute_geodesics
+from GAN.swiss_roll.utils.plotting import plot_geodesic
+from GAN.swiss_roll.utils.plotting import plot_loss_surface
 
 import os
 

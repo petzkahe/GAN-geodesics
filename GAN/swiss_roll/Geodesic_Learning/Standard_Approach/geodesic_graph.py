@@ -1,5 +1,5 @@
-from GAN.swiss_roll.GAN_graph import *
-from GAN.swiss_roll.config_geodesics import *
+from GAN.swiss_roll.GAN_Learning.GAN_graph import *
+from GAN.swiss_roll.Geodesic_Learning.Standard_Approach.config_geodesics import *
 
 import numpy as np
 

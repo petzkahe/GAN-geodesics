@@ -7,7 +7,7 @@ import numpy as np
 matplotlib.use('pdf')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot
 import sklearn.datasets  # sklearn for machine learning  in python
 
-from GAN.swiss_roll.config_GAN import *
+from GAN.swiss_roll.GAN_Learning.config_GAN import *
 
 
 

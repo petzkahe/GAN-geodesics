@@ -1,5 +1,5 @@
-from GAN.swiss_roll.GAN_graph import *
-from GAN.swiss_roll.config_geodesics import *
+from GAN.swiss_roll.GAN_Learning.GAN_graph import *
+from GAN.swiss_roll.Geodesic_Learning.Neural_Network_Approach.config_geodesics_nn import *
 
 import numpy as np
 
@@ -23,8 +23,8 @@ with tf.variable_scope( "Geodesics" ):
 
 
 def parametrize_line(z_in, n_geodesic_interpolations):
-    z_start = z_in[:,0:2]
-    z_end = z_in[:,2:]
+    z_start = tf.transpose(z_in[:,0:2])
+    z_end = tf.transpose(z_in[:,2:])
 
     constant_part = tf.reshape( z_start, shape=(1, dim_latent, tf.shape(z_in)[0]) )
 
@@ -190,13 +190,11 @@ denominator = tf.multiply( denominator, denominator )
 # objective_vector_proposed = tf.divide(1, denominator)
 # objective_vector_proposed = tf.divide(diff_square_vector_latent, denominator)
 
-hyper_lambda = 100000.0
-#objective_vector_proposed = tf.divide( diff_square_vector, denominator )
+# hyper_lambda = 100000.0
+objective_vector_proposed = tf.divide( diff_square_vector, denominator )
 
-objective_vector_proposed = diff_square_vector
-
-#objective_vector_Jacobian = diff_square_vector
-objective_vector_Jacobian = diff_square_vector_latent
+objective_vector_Jacobian = diff_square_vector
+# objective_vector_Jacobian = diff_square_vector_latent
 
 # if method == "proposed"
 

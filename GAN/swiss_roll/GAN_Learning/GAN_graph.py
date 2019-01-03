@@ -1,6 +1,6 @@
 import tensorflow as tf
-import GAN.swiss_roll.nn_layer as layer
-from GAN.swiss_roll.config_GAN import *
+import GAN.swiss_roll.GAN_Learning.nn_layer as layer
+from GAN.swiss_roll.GAN_Learning.config_GAN import *
 
 
 

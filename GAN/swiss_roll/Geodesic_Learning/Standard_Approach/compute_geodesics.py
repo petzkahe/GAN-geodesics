@@ -1,4 +1,4 @@
-from GAN.swiss_roll.geodesic_graph import *
+from GAN.swiss_roll.Geodesic_Learning.Standard_Approach.geodesic_graph import *
 
 
 def set_up_training(objective_Jacobian, objective_proposed):

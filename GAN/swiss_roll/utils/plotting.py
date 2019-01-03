@@ -3,8 +3,8 @@ import numpy as np
 
 matplotlib.use('pdf')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot
 import matplotlib.pyplot as plt
-from GAN.swiss_roll.config_GAN import *
-from GAN.swiss_roll.config_geodesics import *
+from GAN.swiss_roll.GAN_Learning.config_GAN import *
+from GAN.swiss_roll.Geodesic_Learning.Standard_Approach.config_geodesics import *
 
 
 

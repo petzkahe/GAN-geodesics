@@ -4,10 +4,10 @@ learning_rate_geodesics = 1e-3
 adam_beta1 = 0.5
 adam_beta2 = 0.9
 
-n_train_iterations_geodesics = 2000
+n_train_iterations_geodesics = 1000
 
-n_geodesics = 20
-n_interpolations_points_geodesic = 1024  # 128 # or 1024??
+n_geodesics = 10
+n_interpolations_points_geodesic = 512  # 128 # or 1024??
 degree_polynomial_geodesic_latent = 6
 
 n_discriminator_grid_sample = 128

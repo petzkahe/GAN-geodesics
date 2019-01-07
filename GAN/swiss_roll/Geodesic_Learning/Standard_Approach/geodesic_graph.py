@@ -13,7 +13,7 @@ with tf.variable_scope("Geodesics"):
     if sampling_geodesic_coefficients == "zeros":
         coefficients_initializations = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics), dtype='float32')
     elif sampling_geodesic_coefficients == "uniform":
-        coefficients_initializations = np.random.uniform(-0.01,0.01 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
+        coefficients_initializations = np.random.uniform(-0.1,0.1 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
     elif sampling_geodesic_coefficients == "grid":
 
         tmp_grid = np.zeros((n_loss_grid, n_loss_grid, 2), dtype='float32')
@@ -73,7 +73,7 @@ def parametrize_curve(z_start, z_end, interpolation_degree, n_geodesic_interpola
 
 
         coefficients_vector = tf.concat([constant_part, linear_part, coefficients], axis=0)
-        
+
         # Initialize parameter variable of size interpolation_degree times dimensions_noise space
 
         interpolation_matrix_entries = np.zeros(shape=(n_geodesic_interpolations + 1, interpolation_degree + 1))
@@ -119,7 +119,7 @@ def parametrize_curve(z_start, z_end, interpolation_degree, n_geodesic_interpola
         #######################################################################################################33
         #############################################################################################################
 
-        
+
         geodesic_points_in_z_matrix = tf.matmul(
             tf.reshape(tf.transpose(coefficients_vector, perm=[2, 1, 0]), shape=[-1, interpolation_degree + 1]),
             tf.transpose(interpolation_matrix, perm=[1, 0]))
@@ -156,6 +156,8 @@ lines_in_sample_space = tf.transpose(tf.reshape(lines_in_sample_space_vectorized
                                      perm = [1,2,0])
 
 diff_square_vector = tf.reduce_sum(tf.square(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
+# diff_abs_vector = tf.reduce_sum(tf.abs(curves_in_sample_space[1:, :, :] - curves_in_sample_space[:-1, :, :]), axis=1)
+
 diff_square_vector_latent = tf.reduce_sum(tf.square(curves_in_latent_space[1:, :, :] - curves_in_latent_space[:-1, :, :]), axis=1)
 
 
@@ -164,11 +166,10 @@ out_of_domain_penalty = tf.add(tf.exp( tf.clip_by_value(tf.add(tf.abs(curves_in_
 
 small_eps = 0.01
 
-if True:
-    disc_values_curves_sample_space = tf.exp(tf.multiply(0.5,tf.add(tf.log(disc_values_curves_sample_space[1:,:]),tf.log(disc_values_curves_sample_space[:-1,:]))))
-    denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space,small_eps), small_eps,0.4+small_eps)
-else:
-    denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space[1:,:],small_eps), small_eps,0.4+small_eps)
+
+disc_values_curves_sample_space = tf.exp(tf.multiply(0.5,tf.add(tf.log(disc_values_curves_sample_space[1:,:]),tf.log(disc_values_curves_sample_space[:-1,:]))))
+denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space,small_eps), small_eps,0.4+small_eps)
+
 
 #denominator = tf.Print(denominator,[denominator])
 
@@ -178,9 +179,11 @@ denominator = tf.multiply(denominator,denominator)
 #objective_vector_proposed = tf.divide(1, denominator)
 #objective_vector_proposed = tf.divide(diff_square_vector_latent, denominator)
 
-objective_vector_proposed = tf.divide(diff_square_vector,denominator)
+#objective_vector_proposed = tf.divide(diff_square_vector,denominator)
+objective_vector_proposed =  (0.4+small_eps)**2/n_interpolations_points_geodesic* tf.divide(1.0,denominator) + tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))
 
-objective_vector_Jacobian = diff_square_vector
+
+objective_vector_Jacobian = tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))
 
 #if method == "proposed"
 

@@ -65,9 +65,10 @@ def find_geodesics(method, start, end, sess, training,train_writer):
             feed_dict={z_start: start, z_end: end})
 
     elif method == "linear":
-        _curves_in_latent_space_value, _curves_in_sample_space_value = sess.run(
-            [lines_in_latent_space, lines_in_sample_space], feed_dict={z_start: start, z_end: end})
-        _objective_values = None
+        _curves_in_latent_space_value, _curves_in_sample_space_value, _objective_values = sess.run(
+            [lines_in_latent_space, lines_in_sample_space, geodesic_objective_per_geodesic_Jacobian],
+            feed_dict={z_start: start, z_end: end})
+        #_objective_values = None
     
     else:
         raise Exception("method {} unknown".format(method))

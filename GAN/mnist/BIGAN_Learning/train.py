@@ -16,8 +16,8 @@ else:
 
     train_discriminator = tf.train.AdamOptimizer(
         learning_rate=learning_rate,
-        #beta1=0.5,
-        #beta2=0.9,
+        beta1=0.5,
+        beta2=0.999,
         name='Adam.Discriminator'
     ).minimize(
         objective_discriminator,
@@ -26,8 +26,8 @@ else:
 
     train_generator_encoder = tf.train.AdamOptimizer(
         learning_rate=learning_rate,
-        #beta1=0.5,
-        #beta2=0.9,
+        beta1=0.5,
+        beta2=0.999,
         name='Adam.Generator'
     ).minimize(
         objective_generator_encoder,
@@ -49,6 +49,8 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
     for iteration in range(n_BIGAN_iterations):
         # Train generator and encoder
         if iteration > 0:
+            if iteration>n_BIGAN_iterations/2.0 and learning_rate>1e-6:
+                learning_rate=learning_rate*0.999
 
             for j in range(n_generator_encoder_inner):
                 batch_latent_data = generate_latent_data(n_batch_size)

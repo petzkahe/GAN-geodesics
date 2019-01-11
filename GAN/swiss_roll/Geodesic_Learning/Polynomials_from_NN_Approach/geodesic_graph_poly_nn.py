@@ -86,6 +86,7 @@ def parametrize_curve(z_in, interpolation_degree, n_geodesic_interpolations,_coe
 
     geodesic_points_in_z_t = tf.reshape(geodesic_points_in_z_matrix,
                                          shape=[tf.shape( z_in )[0], dim_latent, n_geodesic_interpolations + 1])
+
     geodesic_points_in_z = tf.transpose(geodesic_points_in_z_t, perm=[2, 1, 0]) # shape=(n_geodesic_interpol+1, dim_latent, batch)
 
     geodesic_points_in_z_vectorized = tf.reshape( tf.transpose(geodesic_points_in_z, perm=[2, 0, 1]),

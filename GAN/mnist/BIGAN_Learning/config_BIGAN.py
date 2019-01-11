@@ -1,15 +1,15 @@
-dim_latent = 32
+dim_latent = 50
 dim_data = 28 * 28
 
-dim_nn= 256
+dim_nn= 1024
 # Generator NN is then of form dim_latent -> dim_nn -> dim_nn*2 -> dim_nn -> dim_latent
 # Discriminator NN is then of form dim_latent -> dim_nn -> dim_nn*2 -> dim_nn -> 1
 
-n_batch_size = 64
+n_batch_size = 128
 
 
 
-n_BIGAN_iterations = 1000001
+n_BIGAN_iterations = int(400.0*60000.0/n_batch_size)
 n_discriminator_inner = 1
 n_generator_encoder_inner = 1
 
@@ -17,7 +17,7 @@ n_generator_encoder_inner = 1
 
 log_directory = "logs"
 
-learning_rate = 1e-5
+learning_rate = 1e-4
 
 latent_distribution="uniform"
 #For uniform latent_distribution, define the range

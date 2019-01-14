@@ -17,7 +17,8 @@ def plot_sample_space(samples, iteration_step):
         ax.set_xticks( [] )
         ax.set_yticks( [] )
         #ax.set_title( 'guess = {}, true = {}'.format( arg_max, true ) )
-        plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r' )
+        c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r' )
+        plt.colorbar(c)
     plt.savefig('{}/frame_{}.png'.format(log_directory, iteration_step), bbox_inches='tight' )
     plt.close()
 

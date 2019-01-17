@@ -41,3 +41,5 @@ initialization_value_coefficients=0.5
 penalty=False
 
 log_directory_geodesics = 'logs_geo'
+
+a=1

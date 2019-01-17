@@ -4,9 +4,9 @@ import matplotlib.gridspec as gridspec
 
 matplotlib.use('pdf')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot
 import matplotlib.pyplot as plt
-from GAN.mnist.Geodesic_Learning.config_geodesic_mnist import *
-from GAN.mnist.BIGAN_Learning.config_BIGAN import *
-from GAN.mnist.Geodesic_Learning.config_geodesic_mnist import *
+from GAN.mnist.mnist_alldigits.Geodesic_Learning.config_geodesic_mnist import *
+from GAN.mnist.mnist_alldigits.BIGAN_Learning.config_BIGAN import *
+from GAN.mnist.mnist_alldigits.Geodesic_Learning.config_geodesic_mnist import *
 
 
 def plot_sample_space(samples, iteration_step):

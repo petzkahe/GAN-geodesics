@@ -1,8 +1,8 @@
-from GAN.mnist.Geodesic_Learning.config_geodesic_mnist import *
-from GAN.mnist.utils.generate_data import *
-from GAN.mnist.Geodesic_Learning.compute_geodesics_mnist import compute_geodesics
-from GAN.mnist.utils.plotting import plot_geodesic
-from GAN.mnist.utils.plotting import plot_geodesics_in_pca_space
+from GAN.mnist.mnist_01digits.Geodesic_Learning.config_geodesic_mnist import *
+from GAN.mnist.mnist_01digits.utils.generate_data import *
+from GAN.mnist.mnist_01digits.Geodesic_Learning.compute_geodesics_mnist import compute_geodesics
+from GAN.mnist.mnist_01digits.utils.plotting import plot_geodesic
+from GAN.mnist.mnist_01digits.utils.plotting import plot_geodesics_in_pca_space
 
 
 import os

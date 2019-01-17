@@ -1,6 +1,6 @@
 import tensorflow as tf
-import GAN.mnist.BIGAN_Learning.nn_layer as layer
-from GAN.mnist.BIGAN_Learning.config_BIGAN import *
+import GAN.mnist.mnist_01digits.BIGAN_Learning.nn_layer as layer
+from GAN.mnist.mnist_01digits.BIGAN_Learning.config_BIGAN import *
 import numpy as np
 
 with tf.variable_scope("BIGAN", reuse=tf.AUTO_REUSE):

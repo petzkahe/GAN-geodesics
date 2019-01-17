@@ -1,4 +1,4 @@
-from GAN.mnist.Geodesic_Learning.geodesic_graph_mnist import *
+from GAN.mnist.mnist_01digits.Geodesic_Learning.geodesic_graph_mnist import *
 from tensorflow.examples.tutorials.mnist import input_data
 
 

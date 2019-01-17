@@ -1,7 +1,7 @@
 import os
-from GAN.mnist.BIGAN_Learning.BIGAN_graph import *
-from GAN.mnist.utils.generate_data import *
-from GAN.mnist.utils.plotting import plot_sample_space
+from GAN.mnist.mnist_alldigits.BIGAN_Learning.BIGAN_graph import *
+from GAN.mnist.mnist_alldigits.utils.generate_data import *
+from GAN.mnist.mnist_alldigits.utils.plotting import plot_sample_space
 
 
 # matplotlib.use('Agg')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot

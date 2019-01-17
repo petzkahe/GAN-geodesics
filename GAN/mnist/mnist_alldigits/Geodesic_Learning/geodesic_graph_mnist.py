@@ -1,5 +1,5 @@
-from GAN.mnist.BIGAN_Learning.BIGAN_graph import *
-from GAN.mnist.Geodesic_Learning.config_geodesic_mnist import *
+from GAN.mnist.mnist_alldigits.BIGAN_Learning.BIGAN_graph import *
+from GAN.mnist.mnist_alldigits.Geodesic_Learning.config_geodesic_mnist import *
 import numpy as np
 
 

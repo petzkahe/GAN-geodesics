@@ -1,4 +1,4 @@
-from GAN.mnist.BIGAN_Learning.config_BIGAN import *
+from GAN.mnist.mnist_alldigits.BIGAN_Learning.config_BIGAN import *
 import numpy as np
 
 

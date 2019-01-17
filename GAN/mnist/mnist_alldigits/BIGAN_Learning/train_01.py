@@ -1,7 +1,7 @@
 import os
 from GAN.mnist.mnist_alldigits.BIGAN_Learning.BIGAN_graph import *
 from GAN.mnist.mnist_alldigits.utils.generate_data_01 import *
-from GAN.mnist.mnist_alldigits.utils.plotting import plot_sample_space
+from GAN.mnist.mnist_alldigits.utils.plotting import *
 
 
 

@@ -136,7 +136,7 @@ small_eps = 0.01
 disc_values_curves_sample_space = tf.exp( tf.multiply( 0.5, tf.add( safe_log( disc_values_curves_sample_space[1:, :] ),
                                                                     safe_log(
                                                                         disc_values_curves_sample_space[:-1, :] ) ) ) )
-denominator = tf.clip_by_value( tf.add( disc_values_curves_sample_space, small_eps ), small_eps, 0.4 + small_eps )
+denominator = tf.clip_by_value( tf.add( disc_values_curves_sample_space, small_eps ), small_eps, 0.8 + small_eps )
 
 # denominator = tf.Print(denominator,[denominator])
 
@@ -147,7 +147,7 @@ denominator = tf.multiply( denominator, denominator )
 # objective_vector_proposed = tf.divide(diff_square_vector_latent, denominator)
 
 # objective_vector_proposed = tf.divide(diff_square_vector,denominator)
-objective_vector_proposed = (0.4 + small_eps) ** 2 / n_interpolations_points_geodesic * tf.divide( 1.0,
+objective_vector_proposed = hyper_lambda*(0.8 + small_eps) ** 2 / n_interpolations_points_geodesic * tf.divide( 1.0,
                                                                                                    denominator ) + tf.multiply(
     diff_square_vector, float( n_interpolations_points_geodesic ) )
 
@@ -178,8 +178,34 @@ geodesic_objective_function_Jacobian = tf.reduce_sum(
 
 geodesic_objective_per_geodesic_linear = tf.reduce_sum( objective_vector_linear, axis=0 )
 
+# Illustrate curves in PCA-space:
+
+#   calculate pca for some real mnist samples of two/all classes
+real_samples_for_pca = tf.placeholder(tf.float32,shape=[n_batch_pca,dim_data],name='real_samples_for_pca')
+subspace_map = tf.placeholder(tf.float32,shape=[dim_data,dim_pca],name='subspace_map')
+real_samples_in_pca_space = tf.matmul(real_samples_for_pca,subspace_map)
+
+# Calculate pca for geodesics
+curves_in_pca_space_vectorized = tf.matmul(curves_in_sample_space_vectorized,subspace_map)
+curves_in_pca_space = tf.transpose( tf.reshape( curves_in_pca_space_vectorized, shape=(
+n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
+                                       perm=[1, 2, 0] )
+
+lines_in_pca_space_vectorized = tf.matmul(lines_in_sample_space_vectorized,subspace_map)
+lines_in_pca_space = tf.transpose( tf.reshape( lines_in_pca_space_vectorized, shape=(
+n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
+                                       perm=[1, 2, 0] )
 
 
+
+
+#   setup grid in pca-space, map these into sample space, encode into latent space, and send both into dicriminator
+#   plot cmap of grid of disc points, labeled real samples, and geodesics
+#   select endpoints
+#
+#
+#
+#
 
 #tf.summary.scalar( "geodesic_objective_function_proposed", geodesic_objective_function_proposed )
 #for iter in range( min( n_geodesics, 10 ) ):

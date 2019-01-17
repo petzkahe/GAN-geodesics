@@ -2,6 +2,8 @@ from GAN.mnist.Geodesic_Learning.config_geodesic_mnist import *
 from GAN.mnist.utils.generate_data import *
 from GAN.mnist.Geodesic_Learning.compute_geodesics_mnist import compute_geodesics
 from GAN.mnist.utils.plotting import plot_geodesic
+from GAN.mnist.utils.plotting import plot_geodesics_in_pca_space
+
 
 import os
 
@@ -37,29 +39,41 @@ def initialize_endpoints_of_curve(initialization_mode):
 def sort_geodesics(_geodesics_dict):
     for method in methods:
         if method != 'linear':
-            _curves_in_sample_space_value, _objective_values = _geodesics_dict[method]
+            _curves_in_sample_space_value, _objective_values, _curves_in_pca_space_value = _geodesics_dict[method]
             sorted_indices = np.argsort( _objective_values )
 
             _curves_in_sample_space_value = _curves_in_sample_space_value[:, :, sorted_indices]
             _objective_values = _objective_values[sorted_indices]
-            _geodesics_dict[method] =_curves_in_sample_space_value, _objective_values
+            _curves_in_pca_space_value = _curves_in_pca_space_value[:, :, sorted_indices]
+            _geodesics_dict[method] =_curves_in_sample_space_value, _objective_values, _curves_in_pca_space_value
     return _geodesics_dict
 
 
 z_start_values, z_end_values = initialize_endpoints_of_curve( endpoint_initialization_mode )
 
 
-geodesics_dict = compute_geodesics(z_start_values, z_end_values)
+geodesics_dict, geodesics_suppl_dict = compute_geodesics(z_start_values, z_end_values)
+
 
 if endpoint_initialization_mode=="custom":
     geodesics_dict = sort_geodesics(geodesics_dict)
+
+
+
 
 # returns a dictionary of results
 # key = method
 # value =  a list of two things: curves_in_latent_space_value, curves_in_sample_space_value
 
+
+reals,labels = geodesics_suppl_dict['reals']
+
 for method in methods:
-    [curves_in_sample_space_value, cost] = geodesics_dict[method]
-    print(method)
-    print(cost)
-    plot_geodesic(curves_in_sample_space_value, method)
+	print(method)
+	curves_in_sample_space_value,cost,curves_in_pca_space_value = geodesics_dict[method]
+	print(cost)
+	plot_geodesic(curves_in_sample_space_value, method)
+
+	plot_geodesics_in_pca_space(curves_in_pca_space_value,method,reals,labels)
+
+

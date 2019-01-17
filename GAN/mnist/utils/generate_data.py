@@ -1,17 +1,5 @@
-from tensorflow.examples.tutorials.mnist import input_data
 from GAN.mnist.BIGAN_Learning.config_BIGAN import *
 import numpy as np
-
-# dataset = input_data.read_data_sets('MNIST_data')
-#
-# # generate real samples
-# def generate_real_data(n_batch):
-#
-#     while True:
-#         data, _ = dataset.train.next_batch(n_batch)
-#         yield data
-
-
 
 
 def generate_latent_data(_n_batch):

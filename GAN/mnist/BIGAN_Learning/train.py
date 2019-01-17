@@ -54,7 +54,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
 
             for j in range(n_generator_encoder_inner):
                 batch_latent_data = generate_latent_data(n_batch_size)
-                batch_real_data, _ = dataset.train.next_batch( n_batch_size )
+                rbatch_real_data, _ = dataset.train.next_batch( n_batch_size )
                 _objective_generator, _ = session.run([objective_generator_encoder, train_generator_encoder],
                                                       feed_dict={data_real: batch_real_data, data_latent: batch_latent_data})
 

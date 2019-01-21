@@ -7,7 +7,7 @@ dim_nn= 512
 
 n_batch_size = 256
 
-n_GAN_iterations = 10000
+n_GAN_iterations = 13000
 n_discriminator_inner = 5
 n_generator_inner = 1
 

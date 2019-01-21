@@ -77,7 +77,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
             _objective_critic, _ = session.run([objective_discriminator, train_critic],
                                                feed_dict={data_real: batch_real_data, data_latent: batch_latent_data})
 
-        if iteration % 1000 == 999:
+        if iteration == n_GAN_iterations-1:
             batch_latent_data = generate_latent_data()
             batch_generated_data, batch_disc_value_on_generated = session.run(
                 [data_generated, disc_values_on_generated],

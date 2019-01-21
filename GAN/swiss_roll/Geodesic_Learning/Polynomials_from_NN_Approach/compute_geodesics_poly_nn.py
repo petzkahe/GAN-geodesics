@@ -1,4 +1,5 @@
 from GAN.swiss_roll.Geodesic_Learning.Polynomials_from_NN_Approach.geodesic_graph_poly_nn import *
+import os
 
 
 def set_up_training(objective_Jacobian, objective_proposed):
@@ -102,8 +103,15 @@ def create_grid(_min, _max, _n):
 
 
 def compute_geodesics_poly_nn(latent_start_end):
+    # To load the GAN
     GAN_parameters = tf.get_collection( tf.GraphKeys.TRAINABLE_VARIABLES, scope="GAN" )
     model_saver = tf.train.Saver( GAN_parameters )
+
+    # To save the network
+    NN_parameters = tf.get_collection( tf.GraphKeys.TRAINABLE_VARIABLES, scope="Curve_net" )
+    saver = tf.train.Saver( NN_parameters )
+    train_geodesic_Jacobian, train_geodesic_proposed = set_up_training( geodesic_objective_function_Jacobian,
+                                                                        geodesic_objective_function_proposed )
 
     train_geodesic_Jacobian, train_geodesic_proposed = set_up_training(geodesic_objective_function_Jacobian, geodesic_objective_function_proposed)
     with tf.Session() as session:
@@ -118,7 +126,7 @@ def compute_geodesics_poly_nn(latent_start_end):
         for method in methods:
             session.run(tf.global_variables_initializer())
 
-            model_saver.restore(session, tf.train.latest_checkpoint( 'trained_model/'))
+            model_saver.restore(session, tf.train.latest_checkpoint('../../GAN_Learning/trained_model/'))
 
             if method == "Jacobian":
                 curves_in_latent_space_value, curves_in_sample_space_value, objective_values = find_geodesics_nn(
@@ -158,5 +166,10 @@ def compute_geodesics_poly_nn(latent_start_end):
             disc_values_over_latent_grid = disc_values_over_latent_grid_vectorized.reshape(
                 (n_discriminator_grid_latent, n_discriminator_grid_latent) )
             suppl_dict["disc_values_over_latent_grid"] = disc_values_over_latent_grid
+
+            # Save the model
+            if not os.path.exists( 'trained_NN' ):
+                os.makedirs( 'trained_NN' )
+            saver.save( session, 'trained_NN/NN_{}'.format(method) )
 
     return dict, suppl_dict

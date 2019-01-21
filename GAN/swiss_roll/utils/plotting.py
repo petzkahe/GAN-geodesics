@@ -19,39 +19,14 @@ def plot_sample_space(batch_real_data, batch_generated_data, iteration_step):
 	plt.scatter(batch_real_data[:, 0], batch_real_data[:, 1], c='orange', marker='+')
 	plt.scatter(batch_generated_data[:, 0], batch_generated_data[:, 1], c='green', marker='+')
 
-	plt.savefig('{}/frame_{}.png'.format(log_directory, iteration_step))
+	plt.savefig('{}/frame_{}.pdf'.format(log_directory, iteration_step))
+	plt.savefig( '{}/frame_{}.eps'.format( log_directory, iteration_step ) )
 
 	return None
 
 
-def plot_loss_surface(_dict):
-
-	loss_surface_proposed = _dict['loss_surface_proposed'] 
-	loss_surface_Jacobian = _dict['loss_surface_Jacobian'] 
-
-	xyaxis = np.linspace(coefficient_range[0], coefficient_range[1], n_loss_grid)
-
-	plt.clf()
-
-	c = plt.pcolormesh(xyaxis,xyaxis, np.transpose(np.log(loss_surface_proposed+1e-8)), cmap='gray')
-	plt.colorbar(c)
-
-	plt.savefig('{}/loss_surface_proposed.png'.format(log_directory_geodesics))
-
-	
-	plt.clf()
-
-	c = plt.pcolormesh(xyaxis,xyaxis, np.transpose(np.log(loss_surface_Jacobian+1e-8)), cmap='gray')
-	plt.colorbar(c)
-
-	plt.savefig('{}/loss_surface_Jacobian.png'.format(log_directory_geodesics))
-
-
 
 def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, method, suppl_dict):
-
-
-
 
 
 	disc_values_over_latent_grid = suppl_dict["disc_values_over_latent_grid"]
@@ -64,20 +39,25 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
 	plt.colorbar(c)
 
 
-	for k_geodesics in range(1,geodesics_in_latent.shape[2]):
-		plt.scatter(geodesics_in_latent[:, 0, k_geodesics], geodesics_in_latent[:, 1, k_geodesics],
+	if endpoint_initialization_mode == "custom":
+		for k_geodesics in range(1,geodesics_in_latent.shape[2]):
+			plt.scatter(geodesics_in_latent[:, 0, k_geodesics], geodesics_in_latent[:, 1, k_geodesics],
 					color='green', marker='.', s=1)
-	#plt.scatter(geodesics_in_latent[:, 0, 0], geodesics_in_latent[:, 1, 0],
-	#                color='yellow', marker='.', s=1)
-	plt.plot(geodesics_in_latent[:, 0, 0], geodesics_in_latent[:, 1, 0], 'y-')
-		
+		#plt.scatter(geodesics_in_latent[:, 0, 0], geodesics_in_latent[:, 1, 0],
+		#                color='yellow', marker='.', s=1)
+		plt.plot(geodesics_in_latent[:, 0, 0], geodesics_in_latent[:, 1, 0], 'y-')
 
-	#plt.xlim(latent_min_value, latent_max_value)
-	#plt.ylim(latent_min_value, latent_max_value)
+	else:
+		for k_geodesics in range(geodesics_in_latent.shape[2] ):
+			plt.scatter( geodesics_in_latent[:, 0, k_geodesics], geodesics_in_latent[:, 1, k_geodesics],
+						 color='green', marker='.', s=1 )
+
+
 
 
 	plt.savefig('{}/geodesics_in_latent_space_{}.png'.format(log_directory_geodesics, method))
-
+	#plt.savefig('{}/geodesics_in_latent_space_{}.eps'.format(log_directory_geodesics, method))
+	#plt.savefig( '{}/geodesics_in_latent_space_{}.pdf'.format( log_directory_geodesics, method ) )
 
 
 	# This plots the geodesics in sample space
@@ -98,17 +78,81 @@ def plot_geodesic(samples_real, geodesics_in_latent, geodesics_in_sample_space, 
 
 	plt.scatter(samples_real[:, 0], samples_real[:, 1], c='orange', marker='+')
 
-	for k_geodesics in range(1,geodesics_in_latent.shape[2]):
-		plt.scatter(geodesics_in_sample_space[:, 0, k_geodesics],
-					geodesics_in_sample_space[:, 1, k_geodesics], color='green', marker='.', s=4)
-	#plt.scatter(geodesics_in_sample_space[:, 0, 0], geodesics_in_sample_space[:, 1, 0], color='yellow', marker='.', s=4)
-	plt.plot(geodesics_in_sample_space[:, 0, 0], geodesics_in_sample_space[:, 1, 0], 'y-')
+	if endpoint_initialization_mode == "custom":
 
+		for k_geodesics in range(1,geodesics_in_latent.shape[2]):
+			plt.scatter(geodesics_in_sample_space[:, 0, k_geodesics],
+					geodesics_in_sample_space[:, 1, k_geodesics], color='green', marker='.', s=4)
+		#plt.scatter(geodesics_in_sample_space[:, 0, 0], geodesics_in_sample_space[:, 1, 0], color='yellow', marker='.', s=4)
+		plt.plot(geodesics_in_sample_space[:, 0, 0], geodesics_in_sample_space[:, 1, 0], 'y-')
+
+	else:
+		for k_geodesics in range(geodesics_in_latent.shape[2] ):
+			plt.scatter( geodesics_in_sample_space[:, 0, k_geodesics],
+						 geodesics_in_sample_space[:, 1, k_geodesics], color='green', marker='.', s=4 )
 
 	plt.savefig('{}/geodesics_in_sample_space_{}.png'.format(log_directory_geodesics, method))
+	plt.savefig('{}/geodesics_in_sample_space_{}.eps'.format(log_directory_geodesics, method))
+	plt.savefig( '{}/geodesics_in_sample_space_{}.pdf'.format( log_directory_geodesics, method ) )
 
 	return None
 
+
+
+def plot_geodesic_test(samples_real, geodesics_in_latent, geodesics_in_sample_space, method):
+
+
+	plt.clf()
+
+
+
+	if endpoint_initialization_mode == "custom":
+		for k_geodesics in range(1,geodesics_in_latent.shape[2]):
+			plt.scatter(geodesics_in_latent[:, 0, k_geodesics], geodesics_in_latent[:, 1, k_geodesics],
+					color='green', marker='.', s=1)
+		#plt.scatter(geodesics_in_latent[:, 0, 0], geodesics_in_latent[:, 1, 0],
+		#                color='yellow', marker='.', s=1)
+		plt.plot(geodesics_in_latent[:, 0, 0], geodesics_in_latent[:, 1, 0], 'y-')
+
+	else:
+		for k_geodesics in range(geodesics_in_latent.shape[2] ):
+			plt.scatter( geodesics_in_latent[:, 0, k_geodesics], geodesics_in_latent[:, 1, k_geodesics],
+						 color='green', marker='.', s=1 )
+
+
+
+
+	plt.savefig('{}/geodesics_in_latent_space_{}.png'.format(log_directory_geodesics, method))
+	plt.savefig('{}/geodesics_in_latent_space_{}.eps'.format(log_directory_geodesics, method))
+	plt.savefig( '{}/geodesics_in_latent_space_{}.pdf'.format( log_directory_geodesics, method ) )
+
+
+	# This plots the geodesics in sample space
+
+	plt.clf()
+
+
+
+	plt.scatter(samples_real[:, 0], samples_real[:, 1], c='orange', marker='+')
+
+	if endpoint_initialization_mode == "custom":
+
+		for k_geodesics in range(1,geodesics_in_latent.shape[2]):
+			plt.scatter(geodesics_in_sample_space[:, 0, k_geodesics],
+					geodesics_in_sample_space[:, 1, k_geodesics], color='green', marker='.', s=4)
+		#plt.scatter(geodesics_in_sample_space[:, 0, 0], geodesics_in_sample_space[:, 1, 0], color='yellow', marker='.', s=4)
+		plt.plot(geodesics_in_sample_space[:, 0, 0], geodesics_in_sample_space[:, 1, 0], 'y-')
+
+	else:
+		for k_geodesics in range(geodesics_in_latent.shape[2] ):
+			plt.scatter( geodesics_in_sample_space[:, 0, k_geodesics],
+						 geodesics_in_sample_space[:, 1, k_geodesics], color='green', marker='.', s=4 )
+
+	plt.savefig('{}/geodesics_in_sample_space_{}.png'.format(log_directory_geodesics, method))
+	#plt.savefig('{}/geodesics_in_sample_space_{}.eps'.format(log_directory_geodesics, method))
+	#plt.savefig( '{}/geodesics_in_sample_space_{}.pdf'.format( log_directory_geodesics, method ) )
+
+	return None
 
 
 

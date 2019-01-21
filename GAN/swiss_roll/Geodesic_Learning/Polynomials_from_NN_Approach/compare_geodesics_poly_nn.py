@@ -44,23 +44,16 @@ real_samples = generate_real_samples.__next__()
 
 geodesics_dict, suppl_dict = compute_geodesics_poly_nn(z_in)
 # function which compares local minimas. outputs sorted list of geodesics according to loss
-if n_endpoint_clusters == 1:
-    geodesics_dict = sort_geodesics(geodesics_dict)
-else:
-    raise Exception('sorting for several endpoint clusters not implemented')
+
+geodesics_dict = sort_geodesics(geodesics_dict)
 
 # returns a dictionary of results
 # key = method
 # value =  a list of two things: curves_in_latent_space_value, curves_in_sample_space_value
 
 
-# if do_loss_surface:
-#     plot_loss_surface( geodesics_dict )
-# else:
-
 for method in methods:
     [curves_in_latent_space_value, curves_in_sample_space_value, qq] = geodesics_dict[method]
     plot_geodesic(real_samples, curves_in_latent_space_value, curves_in_sample_space_value, method, suppl_dict)
 
-# curves_in_latent_space_value, curves_in_sample_space_value = geodesics_dict["before"]
-# plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, "before", suppl_dict )
+

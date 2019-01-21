@@ -159,7 +159,7 @@ denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space, small_eps
 
 denominator = tf.multiply(denominator, denominator)
 
-objective_vector_proposed =  (0.4+small_eps)**2/n_interpolations_points_geodesic* tf.divide(1.0,denominator) + tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))
+objective_vector_proposed =  hyper_param_discriminator *(0.4+small_eps)**2/n_interpolations_points_geodesic* tf.divide(1.0,denominator) + tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))
 
 
 objective_vector_Jacobian = tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))

@@ -42,12 +42,7 @@ def find_geodesics(method, start, end, sess, training,train_writer):
     if method=="proposed":
 
         for iteraton in range(n_train_iterations_geodesics):
-            if False:
-                merge = tf.summary.merge_all()
-                summary,_ = sess.run([merge,training], feed_dict={z_start : start, z_end: end})
-                train_writer.add_summary(summary, iteraton)
-            else:
-                _ = sess.run([training], feed_dict={z_start : start, z_end: end})
+            _ = sess.run([training], feed_dict={z_start : start, z_end: end})
                 
 
         _curves_in_latent_space_value, _curves_in_sample_space_value, _objective_values = sess.run(
@@ -68,7 +63,6 @@ def find_geodesics(method, start, end, sess, training,train_writer):
         _curves_in_latent_space_value, _curves_in_sample_space_value, _objective_values = sess.run(
             [lines_in_latent_space, lines_in_sample_space, geodesic_objective_per_geodesic_Jacobian],
             feed_dict={z_start: start, z_end: end})
-        #_objective_values = None
     
     else:
         raise Exception("method {} unknown".format(method))
@@ -86,6 +80,27 @@ def create_grid(_min, _max,_n):
     _grid_vectorized = _grid.reshape((-1, 2))  # gives list of points of all combinations
 
     return _grid_vectorized
+
+
+def select_best(latents, samples, objectives):
+    # input of shape = (n_interpol_points_geodesic + 1, dim_latent, batch)
+    #                   (n_interpol_points_geodesic + 1, dim_data, batch)
+    #                   (batch)
+    # where batch = n_geodesics*n_repeat
+
+    latents_separated = latents.reshape(n_interpolations_points_geodesic+1,dim_latent,n_geodesic_endpoints,n_repeat)
+    samples_separated = samples.reshape(n_interpolations_points_geodesic+1,dim_data,n_geodesic_endpoints,n_repeat)
+    objectives_separated = objectives.reshape(n_geodesic_endpoints,n_repeat)
+
+    indices = np.argmin(objectives_separated ,axis=1)
+
+
+    objectives_selected = np.array([objectives_separated[i,j] for i, j in enumerate(indices)])
+    latents_selected = np.transpose(np.array([latents_separated[:,:,i,j] for i, j in enumerate(indices)]),(1,2,0))
+    samples_selected = np.transpose(np.array([samples_separated[:,:,i,j] for i, j in enumerate(indices)]),(1,2,0))
+
+
+    return latents_selected, samples_selected, objectives_selected
 
 
 ##################################################################################################
@@ -110,98 +125,80 @@ def compute_geodesics(latent_start, latent_end):
         dict = {}
         suppl_dict = {}
 
-        if do_no_training:
+
+        for method in methods:
             session.run(tf.global_variables_initializer())
 
-            model_saver.restore(session, tf.train.latest_checkpoint('../../trained_model/'))
+            model_saver.restore(session, tf.train.latest_checkpoint('../../GAN_Learning/trained_model/'))
 
-            # calculate loss function for each initial variable value on grid and return
-
-            _loss_per_geodesic_proposed,_loss_per_geodesic_Jacobian  = session.run(
-                    [geodesic_objective_per_geodesic_proposed, geodesic_objective_per_geodesic_Jacobian],
-                    feed_dict={z_start: latent_start, z_end: latent_end})
-
-           
-            #raise Exception("So far ({}) so good".format(do_no_training))
-             # reshape vector into matrix
-            loss_surface_proposed = _loss_per_geodesic_proposed.reshape(n_loss_grid,n_loss_grid)
-            dict['loss_surface_proposed'] = loss_surface_proposed
-
-            # reshape vector into matrix
-            loss_surface_Jacobian = _loss_per_geodesic_Jacobian.reshape(n_loss_grid,n_loss_grid)
-            dict['loss_surface_Jacobian'] = loss_surface_Jacobian
-            
-        else:
-
-            for method in methods:
-                session.run(tf.global_variables_initializer())
-
-                model_saver.restore(session, tf.train.latest_checkpoint('../../trained_model/'))
-
-                #######################################################3333
-                ########### DELETE ME WHEN DONE CHECKING STUFF
-                #############################################################
+            #######################################################3333
+            ########### DELETE ME WHEN DONE CHECKING STUFF
+            #############################################################
 
 
-                _curves_in_latent_space_value, _curves_in_sample_space_value = session.run(
-                    [curves_in_latent_space, curves_in_sample_space],
-                    feed_dict={z_start: latent_start, z_end: latent_end})
+            _curves_in_latent_space_value, _curves_in_sample_space_value = session.run(
+                [curves_in_latent_space, curves_in_sample_space],
+                feed_dict={z_start: latent_start, z_end: latent_end})
 
 
 
-                dict["before"] = [_curves_in_latent_space_value, _curves_in_sample_space_value]
+            dict["before"] = [_curves_in_latent_space_value, _curves_in_sample_space_value]
 
 
 
 
 
-                #################################################################
-                #################################################################
-                #################################################################
+            #################################################################
+            #################################################################
+            #################################################################
 
 
 
 
-                if method == "Jacobian":
-                    curves_in_latent_space_value, curves_in_sample_space_value, objective_values = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian,None)
-                    print('Jacobian done!')
-                elif method == "proposed":
-                    train_writer  =  tf.summary.FileWriter( './graphs',session.graph)
-                    curves_in_latent_space_value, curves_in_sample_space_value, objective_values = find_geodesics(method, latent_start, latent_end,
-                                                                                                session, train_geodesic_proposed,train_writer)
-                    print('Proposed done!')
-                    
-                elif method == "linear":
-                    curves_in_latent_space_value, curves_in_sample_space_value, objective_values = find_geodesics(method, latent_start,
-                                                                                                latent_end,
-                                                                                                session,
-                                                                                                None,None)
+            if method == "Jacobian":
+                curves_in_latent_space_value, curves_in_sample_space_value, objective_values = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian,None)
+                print('Jacobian done!')
+            elif method == "proposed":
+                train_writer  =  tf.summary.FileWriter( './graphs',session.graph)
+                curves_in_latent_space_value, curves_in_sample_space_value, objective_values = find_geodesics(method, latent_start, latent_end,
+                                                                                                              session, train_geodesic_proposed,train_writer)
+                print('Proposed done!')
+
+            elif method == "linear":
+                curves_in_latent_space_value, curves_in_sample_space_value, objective_values = find_geodesics(method, latent_start,
+                                                                                                              latent_end,
+                                                                                                              session,
+                                                                                                              None,None)
+
+
+            else:
+                raise Exception("method {} unknown".format(method))
 
 
 
-                else:
-                    raise Exception("method {} unknown".format(method))
+            if endpoint_initialization_mode=="random_repeat" or endpoint_initialization_mode=="custom_repeat":
+                curves_in_latent_space_value, curves_in_sample_space_value, objective_values = select_best(curves_in_latent_space_value, curves_in_sample_space_value, objective_values)
 
 
-                dict[method] = [curves_in_latent_space_value, curves_in_sample_space_value, objective_values]
+            dict[method] = [curves_in_latent_space_value, curves_in_sample_space_value, objective_values]
 
-                variables_names = [v.name for v in tf.trainable_variables()]
-                values = session.run(variables_names)
-
-
-
-            # Calculate discriminator background for sample space 
-            sample_grid_vectorized = create_grid(sample_grid_minima, sample_grid_maxima,n_discriminator_grid_sample)
-            [disc_values_over_sample_grid_vectorized] = session.run([disc_values_on_real], feed_dict={data_real: sample_grid_vectorized})
-            disc_values_over_sample_grid = disc_values_over_sample_grid_vectorized.reshape((n_discriminator_grid_sample, n_discriminator_grid_sample))
-            suppl_dict["disc_values_over_sample_grid"] = disc_values_over_sample_grid
+            variables_names = [v.name for v in tf.trainable_variables()]
+            values = session.run(variables_names)
 
 
-            # Calculate discriminator background for latent space
-            latent_grid_vectorized = create_grid(latent_grid_minima, latent_grid_maxima,n_discriminator_grid_latent)
-            [disc_values_over_latent_grid_vectorized] = session.run([disc_values_on_generated], feed_dict={data_latent: latent_grid_vectorized})
-            disc_values_over_latent_grid = disc_values_over_latent_grid_vectorized.reshape((n_discriminator_grid_latent, n_discriminator_grid_latent))
-            suppl_dict["disc_values_over_latent_grid"] = disc_values_over_latent_grid
+
+        # Calculate discriminator background for sample space
+        sample_grid_vectorized = create_grid(sample_grid_minima, sample_grid_maxima,n_discriminator_grid_sample)
+        [disc_values_over_sample_grid_vectorized] = session.run([disc_values_on_real], feed_dict={data_real: sample_grid_vectorized})
+        disc_values_over_sample_grid = disc_values_over_sample_grid_vectorized.reshape((n_discriminator_grid_sample, n_discriminator_grid_sample))
+        suppl_dict["disc_values_over_sample_grid"] = disc_values_over_sample_grid
+
+
+        # Calculate discriminator background for latent space
+        latent_grid_vectorized = create_grid(latent_grid_minima, latent_grid_maxima,n_discriminator_grid_latent)
+        [disc_values_over_latent_grid_vectorized] = session.run([disc_values_on_generated], feed_dict={data_latent: latent_grid_vectorized})
+        disc_values_over_latent_grid = disc_values_over_latent_grid_vectorized.reshape((n_discriminator_grid_latent, n_discriminator_grid_latent))
+        suppl_dict["disc_values_over_latent_grid"] = disc_values_over_latent_grid
 
 
 

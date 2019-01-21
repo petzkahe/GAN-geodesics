@@ -13,18 +13,8 @@ with tf.variable_scope("Geodesics"):
     if sampling_geodesic_coefficients == "zeros":
         coefficients_initializations = np.zeros(shape=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics), dtype='float32')
     elif sampling_geodesic_coefficients == "uniform":
-        coefficients_initializations = np.random.uniform(-0.1,0.1 , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
-    elif sampling_geodesic_coefficients == "grid":
+        coefficients_initializations = np.random.uniform(-initialization_coefficients,initialization_coefficients , size=(degree_polynomial_geodesic_latent - 1, dim_latent, n_geodesics)).astype("float32")
 
-        tmp_grid = np.zeros((n_loss_grid, n_loss_grid, 2), dtype='float32')
-        tmp_grid[:, :, 0] = np.linspace(coefficient_range[0], coefficient_range[1], n_loss_grid)[:, None]
-        # for zero: for any second entry linspace runs over first coordinate
-        tmp_grid[:, :, 1] = np.linspace(coefficient_range[0], coefficient_range[1], n_loss_grid)[None, :]
-        # for one: for any first entry linspace runs over second coordinate
-        coefficients_initializations = np.transpose(tmp_grid.reshape((1,-1,2)),(0,2,1))
-        print(coefficients_initializations)
-        
-        # calculate a grid and then resize to correct format
     else:
         raise Exception("sampling method {} for geodesic coefficients unknown".format(sampling_geodesic_coefficients))
 
@@ -171,16 +161,9 @@ disc_values_curves_sample_space = tf.exp(tf.multiply(0.5,tf.add(tf.log(disc_valu
 denominator = tf.clip_by_value(tf.add(disc_values_curves_sample_space,small_eps), small_eps,0.4+small_eps)
 
 
-#denominator = tf.Print(denominator,[denominator])
-
-
 denominator = tf.multiply(denominator,denominator)
 
-#objective_vector_proposed = tf.divide(1, denominator)
-#objective_vector_proposed = tf.divide(diff_square_vector_latent, denominator)
-
-#objective_vector_proposed = tf.divide(diff_square_vector,denominator)
-objective_vector_proposed =  (0.4+small_eps)**2/n_interpolations_points_geodesic* tf.divide(1.0,denominator) + tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))
+objective_vector_proposed = hyper_param_discriminator *(0.4+small_eps)**2/n_interpolations_points_geodesic* tf.divide(1.0,denominator) + tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))
 
 
 objective_vector_Jacobian = tf.multiply(diff_square_vector,float(n_interpolations_points_geodesic))
@@ -196,18 +179,17 @@ else:
     penalty_hyper_param = 0
 
 geodesic_objective_per_geodesic_proposed = tf.reduce_sum(objective_vector_proposed,axis=0) 
-#geodesic_objective_per_geodesic_proposed = tf.Print(geodesic_objective_per_geodesic_proposed,[geodesic_objective_per_geodesic_proposed])
+
 geodesic_objective_function_proposed = tf.reduce_sum(geodesic_objective_per_geodesic_proposed) + penalty_hyper_param * geodesic_penalty \
                                         + tf.reduce_sum(out_of_domain_penalty)
-#geodesic_objective_function_proposed = tf.Print(geodesic_objective_function_proposed,[geodesic_objective_function_proposed])
 
-#geodesic_objective_function_proposed = tf.reduce_sum(geodesic_objective_function_proposed) + penalty_hyper_param * geodesic_penalty
+
 
 geodesic_objective_per_geodesic_Jacobian = tf.reduce_sum(objective_vector_Jacobian,axis=0) 
-#geodesic_objective_per_geodesic_Jacobian = tf.Print(geodesic_objective_per_geodesic_Jacobian,[geodesic_objective_per_geodesic_Jacobian])
+
 geodesic_objective_function_Jacobian = tf.reduce_sum(geodesic_objective_per_geodesic_Jacobian) + penalty_hyper_param * geodesic_penalty \
                                         + tf.reduce_sum(out_of_domain_penalty)
-#geodesic_objective_function_Jacobian = tf.reduce_sum(geodesic_objective_function_Jacobian) + penalty_hyper_param * geodesic_penalty
+
 
 
 tf.summary.scalar("geodesic_objective_function_proposed",geodesic_objective_function_proposed)

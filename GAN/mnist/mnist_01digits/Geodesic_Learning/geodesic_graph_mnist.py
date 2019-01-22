@@ -178,6 +178,8 @@ geodesic_objective_function_Jacobian = tf.reduce_sum(
 
 geodesic_objective_per_geodesic_linear = tf.reduce_sum( objective_vector_linear, axis=0 )
 
+##########################################################################################
+
 # Illustrate curves in PCA-space:
 
 #   calculate pca for some real mnist samples of two/all classes
@@ -185,25 +187,37 @@ real_samples_for_pca = tf.placeholder(tf.float32,shape=[n_batch_pca,dim_data],na
 subspace_map = tf.placeholder(tf.float32,shape=[dim_data,dim_pca],name='subspace_map')
 real_samples_in_pca_space = tf.matmul(real_samples_for_pca,subspace_map)
 
-# Calculate pca for geodesics
+# Calculate pca for geodesics:
+# Jacobian and proposed methods
 curves_in_pca_space_vectorized = tf.matmul(curves_in_sample_space_vectorized,subspace_map)
 curves_in_pca_space = tf.transpose( tf.reshape( curves_in_pca_space_vectorized, shape=(
 n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
                                        perm=[1, 2, 0] )
-
+# Linear method
 lines_in_pca_space_vectorized = tf.matmul(lines_in_sample_space_vectorized,subspace_map)
 lines_in_pca_space = tf.transpose( tf.reshape( lines_in_pca_space_vectorized, shape=(
 n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
                                        perm=[1, 2, 0] )
 
-
+# background from pca-space points
 gridpoints_in_pca_space = tf.placeholder(tf.float32,shape=[n_pca_gridpoints,dim_pca],name='gridpoints_in_pca_space')
 gridpoints_in_sample_space = tf.matmul(gridpoints_in_pca_space, tf.transpose(subspace_map))
 with tf.variable_scope("BIGAN",reuse=True):
     gridpoints_in_latent_space = Encoder(gridpoints_in_sample_space)
     gridpoints_discriminated = Discriminator(gridpoints_in_sample_space,gridpoints_in_latent_space)
 
+# background from latent space points
+points_in_latent_space = tf.placeholder(tf.float32,shape=[n_latent_background,dim_latent],name='gridpoints_in_pca_space')
+with tf.variable_scope("BIGAN",reuse=True):
+    points_in_sample_space = Generator(points_in_latent_space)
+    points_discriminated = Discriminator(points_in_sample_space,points_in_latent_space)
+points_in_pca_space = tf.matmul(points_in_sample_space,subspace_map)
 
+##########################################################################################
+
+
+
+# Custom endpoints
 start_custom_in_pca = tf.placeholder(tf.float32,shape=[1,dim_pca],name='start_custom_in_pca')
 end_custom_in_pca = tf.placeholder(tf.float32,shape=[1,dim_pca],name='end_custom_in_pca')
 start_custom_in_sample_space = tf.matmul(start_custom_in_pca,tf.transpose(subspace_map))
@@ -213,6 +227,7 @@ with tf.variable_scope("BIGAN",reuse=True):
     end_custom_in_latent_space = Encoder(end_custom_in_sample_space)
 
 
+##########################################################################################
 
 
 

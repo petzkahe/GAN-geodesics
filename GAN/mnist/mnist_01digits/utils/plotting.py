@@ -1,6 +1,7 @@
 import matplotlib
 import numpy as np
 import matplotlib.gridspec as gridspec
+from matplotlib.mlab import griddata
 
 matplotlib.use('pdf')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot
 import matplotlib.pyplot as plt
@@ -71,18 +72,35 @@ def plot_geodesic(geodesics_in_sample_space, method):
 
     return None
 
-def plot_geodesics_in_pca_space(curves,method,reals,labels,background):
+def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict):
+
+    reals,labels = geodesics_suppl_dict['reals']
+    background = geodesics_suppl_dict['background']
+    latent_background_pca,latent_background_discriminator = geodesics_suppl_dict["latent_background"]
+
 
     plt.clf()
 
     fig,ax = plt.subplots(figsize=(15, 10))
-    mesh = ax.pcolormesh(np.linspace(pca_grid_minima[0], pca_grid_maxima[0], n_pca_grid_per_dimension),
-                   np.linspace(pca_grid_minima[1], pca_grid_maxima[1], n_pca_grid_per_dimension),
-                   np.transpose(background), cmap='gray',vmin=0,vmax=.8)
-    plt.colorbar(mesh)
+    #mesh = ax.pcolormesh(np.linspace(pca_grid_minima[0], pca_grid_maxima[0], n_pca_grid_per_dimension),
+    #               np.linspace(pca_grid_minima[1], pca_grid_maxima[1], n_pca_grid_per_dimension),
+    #               np.transpose(background), cmap='gray',vmin=0,vmax=.8)
+    #plt.colorbar(mesh)
+
+    x = latent_background_pca[:,0]
+    y = latent_background_pca[:,1]
+    z = latent_background_discriminator[:,0]
+    xi = np.linspace(min(x),max(x),n_pca_grid_per_dimension)
+    yi = np.linspace(min(y),max(y),n_pca_grid_per_dimension)
+    zi = griddata(x,y,z,xi,yi,interp='linear')
+    #CS = ax.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
+    CS = ax.contourf(xi, yi, zi, 50,
+                  vmax=(0.801), vmin=.01)
+    fig.colorbar(CS)  # draw colorbar
+
 
     #plot reals and labels
-    ax.scatter(reals[:,0],reals[:,1],c=labels,s=5)
+    ax.scatter(reals[:,0],reals[:,1],c=labels,s=5,cmap='gray')
     #for i, txt in enumerate(labels):
     #    ax.annotate(txt, (reals[i,0], reals[i,1]))
 
@@ -96,6 +114,29 @@ def plot_geodesics_in_pca_space(curves,method,reals,labels,background):
     
     plt.savefig('{}/geodesics_in_pca_{}.png'.format(log_directory_geodesics,method), bbox_inches='tight' )
 
+    plt.clf()
+    
+    print(latent_background_pca.shape)
+    print(latent_background_discriminator.shape)
+
+    fig,ax = plt.subplots(figsize=(15, 10))
+
+    x = latent_background_pca[:,0]
+    y = latent_background_pca[:,1]
+    z = latent_background_discriminator[:,0]
+    xi = np.linspace(min(x),max(x),n_pca_grid_per_dimension)
+    yi = np.linspace(min(y),max(y),n_pca_grid_per_dimension)
+    zi = griddata(x,y,z,xi,yi,interp='linear')
+    #CS = ax.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
+    CS = ax.contourf(xi, yi, zi, 50,
+                  vmax=(0.801), vmin=.01)
+    fig.colorbar(CS)  # draw colorbar
+
+
+    n_part = 1000
+    ax.scatter(latent_background_pca[:n_part,0],latent_background_pca[:n_part,1],s=5)
+
+    plt.savefig('latent_background_test.png', bbox_inches='tight' )
     
 
 

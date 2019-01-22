@@ -88,6 +88,7 @@ if endpoint_initialization_mode=="custom":
 
 reals,labels = geodesics_suppl_dict['reals']
 discriminator_background = geodesics_suppl_dict['background']
+latent_background_pca,latent_background_discriminator = geodesics_suppl_dict["latent_background"]
 
 for method in methods:
 	print(method)
@@ -95,6 +96,6 @@ for method in methods:
 	print(cost)
 	plot_geodesic(curves_in_sample_space_value, method)
 
-	plot_geodesics_in_pca_space(curves_in_pca_space_value,method,reals,labels,discriminator_background)
+	plot_geodesics_in_pca_space(curves_in_pca_space_value,method,geodesics_suppl_dict)
 
 

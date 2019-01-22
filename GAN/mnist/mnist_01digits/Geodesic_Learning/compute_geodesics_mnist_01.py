@@ -82,7 +82,9 @@ def compute_geodesics(latent_start, latent_end):
     train_geodesic_Jacobian, train_geodesic_proposed = set_up_training( geodesic_objective_function_Jacobian,
                                                                         geodesic_objective_function_proposed )
 
-    dataset = input_data.read_data_sets( 'MNIST_data' )
+    mnist_dir = "../../MNIST_data"
+    print('Trying out mnist_dir=' + str(mnist_dir))
+    dataset = input_data.read_data_sets(mnist_dir)
     training_data = dataset.train.images
     training_labels = dataset.train.labels
 
@@ -144,12 +146,23 @@ def compute_geodesics(latent_start, latent_end):
         reals_in_pca = session.run(real_samples_in_pca_space, feed_dict={real_samples_for_pca: reals, subspace_map: _subspace_map} )
         suppl_dict['reals'] = [reals_in_pca,labels]
 
-
+        # Uniform pca background
         grid_in_pca_vectorized = create_grid(pca_grid_minima, pca_grid_maxima,n_pca_grid_per_dimension)
         [_gridpoints_discriminated_vectorized] = session.run([gridpoints_discriminated], feed_dict={gridpoints_in_pca_space: grid_in_pca_vectorized,subspace_map:_subspace_map})
         _gridpoints_discriminated = _gridpoints_discriminated_vectorized.reshape((n_pca_grid_per_dimension, n_pca_grid_per_dimension))
         suppl_dict["background"] = _gridpoints_discriminated
 
+
+        # Latent space background
+
+            # generate random points in latent space
+        latent_points = np.random.uniform( low=latent_points_minima, high=latent_points_maxima,
+                                           size=[n_latent_background, dim_latent] ).astype('float32' )
+            # output points in pca, and discriminator values from session
+        pca_points,discriminator_points = session.run([points_in_pca_space,points_discriminated], 
+            feed_dict={points_in_latent_space:latent_points, subspace_map: _subspace_map})
+            # add to suppl_dict
+        suppl_dict["latent_background"] = [pca_points,discriminator_points]
 
 
 

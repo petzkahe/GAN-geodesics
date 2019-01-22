@@ -2,7 +2,7 @@ from GAN.swiss_roll.Geodesic_Learning.Standard_Approach.config_geodesics import 
 from GAN.swiss_roll.utils.generate_data import *
 from GAN.swiss_roll.Geodesic_Learning.Standard_Approach.compute_geodesics import compute_geodesics
 from GAN.swiss_roll.utils.plotting import plot_geodesic
-from GAN.swiss_roll.utils.plotting import plot_loss_surface
+
 
 import os
 
@@ -23,117 +23,32 @@ def initialize_endpoints_of_curve(initialization_mode):
         z_end_value = np.random.uniform( low=latent_min_value, high=latent_max_value,
                                          size=[1, dim_latent, n_geodesics] ).astype( 'float32' )
 
+    elif initialization_mode == "custom_repeat":
+        z_starts = np.transpose( np.array(
+            [[-0.5, 0.5], [-0.8, 0.8], [-1.0, 0.5], [-0.5, 0.4], [-0.55, 0.55], [-0.7, 0.7], [-0.85, 0.55],
+             [-0.35, 0.37], [-0.8, 0.0], [-0.4, 0.6]] ) ).reshape( 1, 2, 10 )
+        z_ends = np.transpose( np.array(
+            [[0.5, 0.5], [0.3, 0.8], [0.8, 0.8], [0.2, 0.8], [0.25, 0.85], [0.22, 0.82], [0.33, 0.82], [0.52, 0.47],
+             [0.0, 1.0], [0.5, -0.1]] ) ).reshape( 1, 2, 10 )
+        z_start_value = np.repeat( z_starts, n_repeat, axis=2 )
+        z_end_value = np.repeat( z_ends, n_repeat, axis=2 )
+
+
+    elif initialization_mode == "random_repeat":
+        z_start_value = np.random.uniform( low=latent_min_value, high=latent_max_value,
+                                           size=[1, dim_latent, n_geodesic_endpoints] ).astype(
+            'float32' )
+        z_start_value = np.repeat(z_start_value,n_repeat,axis=2)
+        z_end_value = np.random.uniform( low=latent_min_value, high=latent_max_value,
+                                           size=[1, dim_latent, n_geodesic_endpoints] ).astype(
+            'float32' )
+        z_end_value = np.repeat( z_end_value, 5, axis=2)
+
 
     elif initialization_mode == "custom":
-        if n_geodesics % n_endpoint_clusters:
-            raise Exception( "Please select {} such that it evenly divides {}" ).format( n_endpoint_clusters,
-                                                                                         n_geodesics )
-        n_repeats = n_geodesics / n_endpoint_clusters
+        z_start_value = np.repeat( np.reshape( np.array( z_start_center ), (1, dim_latent, 1) ),  n_geodesics, axis=2 )
+        z_end_value = np.repeat( np.reshape( np.array( z_end_center ), (1, dim_latent, 1) ), n_geodesics, axis=2 )
 
-        # z_start_center = [-0.75,-0.75]
-        # z_end_center = [0.5,-0.75]
-
-        sigma = 0.00
-        z_start_clusters = np.repeat( np.reshape( np.array( z_start_center ), (1, dim_latent, 1) ), \
-                                      n_endpoint_clusters, axis=2 ) + \
-                           np.random.normal( 0, sigma, (1, dim_latent, n_endpoint_clusters) ).astype( 'float32' )
-        z_end_clusters = np.repeat( np.reshape( np.array( z_end_center ), (1, dim_latent, 1) ), \
-                                    n_endpoint_clusters, axis=2 ) + \
-                         np.random.normal( 0, sigma, (1, dim_latent, n_endpoint_clusters) ).astype( 'float32' )
-
-        z_start_value = np.repeat( z_start_clusters, n_repeats, axis=2 )
-        z_end_value = np.repeat( z_end_clusters, n_repeats, axis=2 )
-
-
-    elif initialization_mode == "clustered_random":
-        if n_geodesics % n_endpoint_clusters:
-            raise Exception( "Please select {} such that it evenly divides {}" ).format( n_endpoint_clusters,
-                                                                                         n_geodesics )
-        n_repeats = n_geodesics / n_endpoint_clusters
-
-        z_start_value = np.repeat( np.random.uniform( low=latent_min_value, high=latent_max_value,
-                                                      size=[1, dim_latent, n_endpoint_clusters] ).astype(
-            'float32' ), n_repeats, axis=2 )
-        z_end_value = np.repeat( np.random.uniform( low=latent_min_value, high=latent_max_value,
-                                                    size=[1, dim_latent, n_endpoint_clusters] ).astype(
-            'float32' ), n_repeats, axis=2 )
-
-
-    elif initialization_mode == "horizontal_grid":
-
-        z_start_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-        y_axis = np.linspace( latent_min_value, latent_max_value, n_geodesics )
-        x_axis = np.ones( n_geodesics )
-        z_start_value[0, 0, :] = latent_min_value * x_axis
-        z_start_value[0, 1, :] = y_axis
-
-        z_end_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-        z_end_value[0, 0, :] = latent_max_value * x_axis
-        z_end_value[0, 1, :] = y_axis
-
-    elif initialization_mode == "clustered_horizontal":
-        if n_geodesics % n_endpoint_clusters:
-            raise Exception( "Please select {} such that it evenly divides {}" ).format( n_endpoint_clusters,
-                                                                                         n_geodesics )
-        n_repeats = n_geodesics / n_endpoint_clusters
-
-        z_start_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-
-        temp_axis = np.linspace( latent_min_value, latent_max_value, n_endpoint_clusters + 2 )
-        temp_axis_rm_ends = temp_axis[1:-1]
-
-        y_axis = np.repeat( temp_axis_rm_ends, n_repeats )
-        x_axis = np.ones( n_geodesics )
-        z_start_value[0, 0, :] = latent_min_value * x_axis
-        z_start_value[0, 1, :] = y_axis
-
-        z_end_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-        z_end_value[0, 0, :] = latent_max_value * x_axis
-        z_end_value[0, 1, :] = y_axis
-
-
-
-    elif initialization_mode == "vertical_grid":
-
-        z_start_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-
-        x_axis = np.linspace( latent_min_value, latent_max_value, n_geodesics )
-        y_axis = np.ones( n_geodesics )
-        z_start_value[0, 0, :] = x_axis
-        z_start_value[0, 1, :] = latent_min_value * y_axis
-
-        z_end_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-        z_end_value[0, 0, :] = x_axis
-        z_end_value[0, 1, :] = latent_max_value * y_axis
-
-
-    elif initialization_mode == "clustered_vertical":
-        if n_geodesics % n_endpoint_clusters:
-            raise Exception( "Please select {} such that it evenly divides {}" ).format( n_endpoint_clusters,
-                                                                                         n_geodesics )
-        n_repeats = n_geodesics / n_endpoint_clusters
-
-        z_start_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-
-        temp_axis = np.linspace( latent_min_value, latent_max_value, n_endpoint_clusters + 2 )
-        temp_axis_rm_ends = temp_axis[1:-1]
-
-        x_axis = np.repeat( temp_axis_rm_ends, n_repeats )
-        y_axis = np.ones( n_geodesics )
-        z_start_value[0, 0, :] = x_axis
-        z_start_value[0, 1, :] = latent_min_value * y_axis
-
-        z_end_value = np.zeros( [1, dim_latent, n_geodesics] ).astype(
-            'float32' )
-        z_end_value[0, 0, :] = x_axis
-        z_end_value[0, 1, :] = latent_max_value * y_axis
 
     else:
         raise Exception( "Initialization_mode {} not known".format( initialization_mode ) )
@@ -143,13 +58,14 @@ def initialize_endpoints_of_curve(initialization_mode):
 
 def sort_geodesics(_geodesics_dict):
     for method in methods:
-        if method != 'linear':
+        if method != 'linear' :
             _curves_in_latent_space_value, _curves_in_sample_space_value, _objective_values = _geodesics_dict[method]
             sorted_indices = np.argsort( _objective_values )
             _curves_in_latent_space_value = _curves_in_latent_space_value[:, :, sorted_indices]
             _curves_in_sample_space_value = _curves_in_sample_space_value[:, :, sorted_indices]
             _objective_values = _objective_values[sorted_indices]
             _geodesics_dict[method] = _curves_in_latent_space_value, _curves_in_sample_space_value, _objective_values
+
     return _geodesics_dict
 
 
@@ -160,25 +76,19 @@ real_samples = generate_real_samples.__next__()
 geodesics_dict, suppl_dict = compute_geodesics( z_start_values, z_end_values )
 
 # function which compares local minimas. outputs sorted list of geodesics according to loss
-if do_loss_surface == False:
-    if n_endpoint_clusters == 1:
-        geodesics_dict = sort_geodesics( geodesics_dict )
-    else:
-        raise Exception( 'sorting for several endpoint clusters not implemented' )
+
+
+geodesics_dict = sort_geodesics( geodesics_dict )
 
 # returns a dictionary of results
 # key = method
 # value =  a list of two things: curves_in_latent_space_value, curves_in_sample_space_value
 
 
-if do_loss_surface:
-    plot_loss_surface( geodesics_dict )
-else:
+for method in methods:
+    [curves_in_latent_space_value, curves_in_sample_space_value, objective_values] = geodesics_dict[method]
+    print(objective_values)
+    plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, method, suppl_dict )
 
-    for method in methods:
-        [curves_in_latent_space_value, curves_in_sample_space_value, qq] = geodesics_dict[method]
-        print(qq)
-        plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, method, suppl_dict )
-
-    curves_in_latent_space_value, curves_in_sample_space_value = geodesics_dict["before"]
-    plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, "before", suppl_dict )
+curves_in_latent_space_value, curves_in_sample_space_value = geodesics_dict["before"]
+plot_geodesic( real_samples, curves_in_latent_space_value, curves_in_sample_space_value, "before", suppl_dict )

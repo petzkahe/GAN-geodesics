@@ -3,14 +3,16 @@ import numpy as np
 import matplotlib.gridspec as gridspec
 from matplotlib.mlab import griddata
 
+
 matplotlib.use('pdf')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot
 import matplotlib.pyplot as plt
 from GAN.mnist.mnist_01digits.Geodesic_Learning.config_geodesic_mnist import *
 from GAN.mnist.mnist_01digits.BIGAN_Learning.config_BIGAN import *
 from GAN.mnist.mnist_01digits.Geodesic_Learning.config_geodesic_mnist import *
+from GAN.mnist.mnist_01digits.main_config import *
 
 
-def plot_sample_space(samples, iteration_step):
+def plot_sample_space_01(samples, iteration_step,_dir):
     plt.figure( figsize=(12, 10) )
     gs = gridspec.GridSpec( 5, 5 )
     for j, generated_image in enumerate( samples ):
@@ -20,34 +22,17 @@ def plot_sample_space(samples, iteration_step):
         #ax.set_title( 'guess = {}, true = {}'.format( arg_max, true ) )
         c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r', vmin=0, vmax=1)
         plt.colorbar(c)
-    plt.savefig('{}/frame_{}.png'.format(log_directory, iteration_step), bbox_inches='tight' )
+    plt.savefig('{}/frame_{}.png'.format(_dir + log_directory_01, iteration_step), bbox_inches='tight' )
     plt.close()
 
     return None
 
-def plot_sample_space_01(samples, iteration_step):
-    plt.figure( figsize=(12, 10) )
-    gs = gridspec.GridSpec( 5, 5 )
-    for j, generated_image in enumerate( samples ):
-        ax = plt.subplot( gs[j] )
-        ax.set_xticks( [] )
-        ax.set_yticks( [] )
-        #ax.set_title( 'guess = {}, true = {}'.format( arg_max, true ) )
-        c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r', vmin=0, vmax=1)
-        plt.colorbar(c)
-    plt.savefig('{}/frame_{}.png'.format(log_directory_01, iteration_step), bbox_inches='tight' )
-    plt.close()
-
-    return None
-
-def plot_geodesic(geodesics_in_sample_space, method):
+def plot_geodesic(geodesics_in_sample_space, method, _dir):
 
     plt.clf()
 
     plt.figure( figsize=(15, 10))
     gs = gridspec.GridSpec(n_geodesics,n_interp_selected)
-
-
 
     filter = [j*increment for j in range(n_interp_selected-1)]+[n_interpolations_points_geodesic]
 
@@ -67,12 +52,12 @@ def plot_geodesic(geodesics_in_sample_space, method):
         plt.colorbar(c)
         #plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r', vmin=0, vmax=1)
     
-    plt.savefig('{}/geodesics_{}.png'.format(log_directory_geodesics, method), bbox_inches='tight' )
+    plt.savefig('{}/geodesics_{}.png'.format(_dir, method), bbox_inches='tight' )
     plt.close()
 
     return None
 
-def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict):
+def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict, _dir):
 
     reals,labels = geodesics_suppl_dict['reals']
     background = geodesics_suppl_dict['background']
@@ -112,35 +97,6 @@ def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict):
     #                color='yellow', marker='.', s=1)
     plt.plot(curves[:, 0, 0], curves[:, 1, 0], 'k.-')
     
-    plt.savefig('{}/geodesics_in_pca_{}.png'.format(log_directory_geodesics,method), bbox_inches='tight' )
-
-    plt.clf()
-    
-    print(latent_background_pca.shape)
-    print(latent_background_discriminator.shape)
-
-    fig,ax = plt.subplots(figsize=(15, 10))
-
-    x = latent_background_pca[:,0]
-    y = latent_background_pca[:,1]
-    z = latent_background_discriminator[:,0]
-    xi = np.linspace(min(x),max(x),n_pca_grid_per_dimension)
-    yi = np.linspace(min(y),max(y),n_pca_grid_per_dimension)
-    zi = griddata(x,y,z,xi,yi,interp='linear')
-    #CS = ax.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
-    CS = ax.contourf(xi, yi, zi, 50,
-                  vmax=(0.801), vmin=.01)
-    fig.colorbar(CS)  # draw colorbar
-
-
-    n_part = 1000
-    ax.scatter(latent_background_pca[:n_part,0],latent_background_pca[:n_part,1],s=5)
-
-    plt.savefig('latent_background_test.png', bbox_inches='tight' )
-    
-
-
-
-
+    plt.savefig('{}/geodesics_in_pca_{}.png'.format(_dir,method), bbox_inches='tight' )
 
 

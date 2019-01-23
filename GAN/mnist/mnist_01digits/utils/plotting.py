@@ -79,8 +79,8 @@ def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict, _dir):
     yi = np.linspace(min(y),max(y),n_pca_grid_per_dimension)
     zi = griddata(x,y,z,xi,yi,interp='linear')
     #CS = ax.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
-    CS = ax.contourf(xi, yi, zi, 50,
-                  vmax=(0.801), vmin=.01)
+    CS = ax.contourf(xi, yi, zi, 100,
+                  vmax=(1), vmin=0)
     fig.colorbar(CS)  # draw colorbar
 
 

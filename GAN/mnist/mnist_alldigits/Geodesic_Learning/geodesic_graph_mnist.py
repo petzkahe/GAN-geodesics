@@ -100,12 +100,25 @@ lines_in_latent_space_vectorized = tf.reshape( tf.transpose( lines_in_latent_spa
                                                n_geodesics * (n_interpolations_points_geodesic + 1), dim_latent) )
 
 
+video_frames_in_latent_space = parametrize_curve( z_start, z_end, degree_polynomial_geodesic_latent,
+                                            n_video_frames)
+video_frames_in_latent_space_vectorized = tf.reshape( tf.transpose( video_frames_in_latent_space, perm=[2, 0, 1] ),
+                                                shape=(
+                                                n_geodesics * (n_video_frames +1), dim_latent))
+
+
 
 with tf.variable_scope("BIGAN",reuse=True):
     curves_in_sample_space_vectorized = Generator( curves_in_latent_space_vectorized )
     disc_values_curves_sample_space_vectorized = Discriminator(curves_in_sample_space_vectorized, curves_in_latent_space_vectorized)
 
     lines_in_sample_space_vectorized = Generator( lines_in_latent_space_vectorized )
+
+    video_frames_in_sample_space_vectorized = Generator(video_frames_in_latent_space_vectorized)
+
+video_frames_in_sample_space = tf.transpose( tf.reshape( video_frames_in_sample_space_vectorized, shape=(
+n_geodesics, n_video_frames+1, dim_data) ),
+                                       perm=[1, 2, 0] )
 
 disc_values_curves_sample_space = tf.transpose(
     tf.reshape( disc_values_curves_sample_space_vectorized, shape=(n_geodesics, n_interpolations_points_geodesic + 1) ),
@@ -203,20 +216,6 @@ n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
 ######################
 #### VIDEO CREATION
 #######################
-
-
-video_frames_in_latent_space = parametrize_curve( z_start, z_end, degree_polynomial_geodesic_latent,
-                                            n_video_frames)
-video_frames_in_latent_space_vectorized = tf.reshape( tf.transpose( video_frames_in_latent_space, perm=[2, 0, 1] ),
-                                                shape=(
-                                                n_geodesics * (n_video_frames +1), dim_latent))
-
-with tf.variable_scope("BIGAN",reuse=True):
-    video_frames_in_sample_space_vectorized = Generator(video_frames_in_latent_space_vectorized)
-
-video_frames_in_sample_space = tf.transpose( tf.reshape( video_frames_in_sample_space_vectorized, shape=(
-n_geodesics, n_video_frames+1, dim_data) ),
-                                       perm=[1, 2, 0] )
 
 
 

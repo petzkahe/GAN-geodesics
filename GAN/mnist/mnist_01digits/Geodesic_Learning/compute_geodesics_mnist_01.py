@@ -100,7 +100,7 @@ def compute_geodesics(latent_start, latent_end):
             session.run( tf.global_variables_initializer() )
 
             model_saver.restore( session, tf.train.latest_checkpoint( results_directory + 'BIGAN/trained_model/' ) )
-
+            print(results_directory)
             
             if method == "Jacobian":
                 curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian, None, _subspace_map )
@@ -158,6 +158,7 @@ def compute_geodesics(latent_start, latent_end):
         pca_points,discriminator_points = session.run([points_in_pca_space,points_discriminated], 
             feed_dict={points_in_latent_space:latent_points, subspace_map: _subspace_map})
             # add to suppl_dict
+        print('Mean is ' + str(np.mean(discriminator_points)))
         suppl_dict["latent_background"] = [pca_points,discriminator_points]
 
 

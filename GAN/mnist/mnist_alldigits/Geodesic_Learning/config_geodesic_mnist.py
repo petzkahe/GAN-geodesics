@@ -4,7 +4,7 @@ learning_rate_geodesics = 1e-2
 adam_beta1 = 0.5
 adam_beta2 = 0.999
 
-n_train_iterations_geodesics = 100
+n_train_iterations_geodesics = 10000
 
 n_geodesics = 5
 n_interpolations_points_geodesic_approx = 256 # 128 # or 1024??

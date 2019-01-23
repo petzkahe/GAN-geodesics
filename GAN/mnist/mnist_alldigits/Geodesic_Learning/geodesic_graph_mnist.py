@@ -20,7 +20,7 @@ with tf.variable_scope( "Geodesics" ):
         raise Exception(
             "sampling method {} for geodesic coefficients unknown".format( sampling_geodesic_coefficients ) )
 
-    coefficients = tf.Variable( initial_value=coefficients_initializations, name='coefficients' )
+    coefficients = tf.Variable(initial_value=coefficients_initializations, name='coefficients')
 
 
 
@@ -98,6 +98,8 @@ lines_in_latent_space = parametrize_line( z_start, z_end, n_interpolations_point
 lines_in_latent_space_vectorized = tf.reshape( tf.transpose( lines_in_latent_space, perm=[2, 0, 1] ),
                                                shape=(
                                                n_geodesics * (n_interpolations_points_geodesic + 1), dim_latent) )
+
+
 
 with tf.variable_scope("BIGAN",reuse=True):
     curves_in_sample_space_vectorized = Generator( curves_in_latent_space_vectorized )
@@ -198,14 +200,26 @@ n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
 
 
 
+######################
+#### VIDEO CREATION
+#######################
 
-#   setup grid in pca-space, map these into sample space, encode into latent space, and send both into dicriminator
-#   plot cmap of grid of disc points, labeled real samples, and geodesics
-#   select endpoints
-#
-#
-#
-#
+
+video_frames_in_latent_space = parametrize_curve( z_start, z_end, degree_polynomial_geodesic_latent,
+                                            n_video_frames)
+video_frames_in_latent_space_vectorized = tf.reshape( tf.transpose( video_frames_in_latent_space, perm=[2, 0, 1] ),
+                                                shape=(
+                                                n_geodesics * (n_video_frames +1), dim_latent))
+
+with tf.variable_scope("BIGAN",reuse=True):
+    video_frames_in_sample_space_vectorized = Generator(video_frames_in_latent_space_vectorized)
+
+video_frames_in_sample_space = tf.transpose( tf.reshape( video_frames_in_sample_space_vectorized, shape=(
+n_geodesics, n_video_frames+1, dim_data) ),
+                                       perm=[1, 2, 0] )
+
+
+
 
 #tf.summary.scalar( "geodesic_objective_function_proposed", geodesic_objective_function_proposed )
 #for iter in range( min( n_geodesics, 10 ) ):

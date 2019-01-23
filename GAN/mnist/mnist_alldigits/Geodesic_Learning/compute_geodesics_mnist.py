@@ -1,6 +1,6 @@
 from GAN.mnist.mnist_alldigits.Geodesic_Learning.geodesic_graph_mnist import *
 from tensorflow.examples.tutorials.mnist import input_data
-
+import os
 
 def set_up_training(objective_Jacobian, objective_proposed):
 
@@ -25,7 +25,7 @@ def set_up_training(objective_Jacobian, objective_proposed):
     return train_Jacobian, train_proposed
 
 
-def find_geodesics(method, start, end, sess, training, train_writer,V):
+def find_geodesics(method, start, end, sess, training, train_writer, V):
     if method == "proposed":
         print('Proposed method training')
         for iteration in range( n_train_iterations_geodesics ):
@@ -33,9 +33,11 @@ def find_geodesics(method, start, end, sess, training, train_writer,V):
             if iteration % 500 == 0:
                 print(str(int(iteration/n_train_iterations_geodesics*100.0)) + ' %')
 
-        curves_in_sample_space_value, _objective_values, curves_in_pca_space_value = sess.run(
+        curves_in_sample_space_value, _objective_values, curves_in_pca_space_value= sess.run(
             [curves_in_sample_space, geodesic_objective_per_geodesic_proposed, curves_in_pca_space],
             feed_dict={z_start: start, z_end: end,subspace_map:V} )
+
+
 
     elif method == "Jacobian":
         print('Jacobian method training')
@@ -48,11 +50,13 @@ def find_geodesics(method, start, end, sess, training, train_writer,V):
             [curves_in_sample_space, geodesic_objective_per_geodesic_Jacobian, curves_in_pca_space],
             feed_dict={z_start: start, z_end: end,subspace_map:V} )
 
+
+
     elif method == "linear":
         curves_in_sample_space_value, _objective_values, curves_in_pca_space_value = sess.run(
             [lines_in_sample_space, geodesic_objective_per_geodesic_linear, lines_in_pca_space],
             feed_dict={z_start: start, z_end: end, subspace_map:V} )
-        # _objective_values = None
+
 
     else:
         raise Exception( "method {} unknown".format( method ) )
@@ -79,6 +83,10 @@ def compute_geodesics(latent_start, latent_end):
     BIGAN_parameters = tf.get_collection( tf.GraphKeys.TRAINABLE_VARIABLES, scope="BIGAN" )
     model_saver = tf.train.Saver(BIGAN_parameters)
 
+    # To save the polynomial coefficients
+    coefficient_parameters = tf.get_collection( tf.GraphKeys.TRAINABLE_VARIABLES, scope="Geodesics" )
+    coefficients_saver = tf.train.Saver(coefficient_parameters)
+
     train_geodesic_Jacobian, train_geodesic_proposed = set_up_training( geodesic_objective_function_Jacobian,
                                                                         geodesic_objective_function_proposed )
 
@@ -103,9 +111,7 @@ def compute_geodesics(latent_start, latent_end):
                 print( 'Jacobian done!' )
             elif method == "proposed":
                 train_writer = tf.summary.FileWriter( './graphs', session.graph )
-                curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(
-                    method, latent_start, latent_end,
-                    session, train_geodesic_proposed, train_writer, _subspace_map )
+                curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_proposed, None, _subspace_map )
                 print( 'Proposed done!' )
 
             elif method == "linear":
@@ -121,7 +127,12 @@ def compute_geodesics(latent_start, latent_end):
                 raise Exception( "method {} unknown".format( method ) )
 
             dict[method] = [curves_in_sample_space_value, objective_values, curves_in_pca_space_value]
-            
+
+
+            if not os.path.exists( 'trained_polynomials/{}'.format(method) ):
+                os.makedirs( 'trained_polynomials/{}'.format(method) )
+            coefficients_saver.save( session, 'trained_polynomials/{}'.format(method) )
+
             #variables_names = [v.name for v in tf.trainable_variables()]
             #values = session.run( variables_names )
 
@@ -139,7 +150,9 @@ def compute_geodesics(latent_start, latent_end):
 
 
 
+
         return dict, suppl_dict
+
 
 
 

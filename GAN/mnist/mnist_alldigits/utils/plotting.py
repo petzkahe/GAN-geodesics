@@ -1,6 +1,7 @@
 import matplotlib
 import numpy as np
 import matplotlib.gridspec as gridspec
+import os
 
 matplotlib.use('pdf')  # to generate png images, alternatives: ps, pdf, svg, specify before importing pyplot
 import matplotlib.pyplot as plt
@@ -89,6 +90,49 @@ def plot_geodesics_in_pca_space(curves,method,reals,labels):
     plt.plot(curves[:, 0, 0], curves[:, 1, 0], 'k.-')
     
     plt.savefig('{}/geodesics_in_pca_{}.png'.format(log_directory_geodesics,method), bbox_inches='tight' )
+
+
+
+
+
+def make_videos(video_dict):
+    # video_dict[method] = [video_frames_sample]
+
+    for n in range(n_geodesics):
+        frame={}
+
+        for i  in range(n_video_frames + 1):
+            for method in methods:
+
+                frame[method] = np.reshape(  np.array(video_dict[method])[0,i,:,n], (dim_data)) # video_dict[method] of shape = 1, n_video_frames + 1, dim_data, batch
+
+            plt.clf()
+            plt.figure( figsize=(10, 7))
+
+            for j, method in enumerate(methods):
+                ax = plt.subplot(1,3,j+1)
+                #ax.set_xticks([])
+                #ax.set_yticks([])
+                ax.set_title( '{}'.format(method))
+                plt.imshow(frame[method].reshape(28, 28), cmap='Greys_r')
+
+            if not os.path.exists( '{}/video_frames/geodesic_{}'.format( log_directory_geodesics, n) ):
+                os.makedirs( '{}/video_frames/geodesic_{}'.format( log_directory_geodesics, n) )
+
+
+            if i in range(10):
+                plt.savefig( '{}/video_frames/geodesic_{}/image-00{}.png'.format( log_directory_geodesics, n, i ), bbox_inches='tight' )
+            elif i in range(10,100):
+                plt.savefig( '{}/video_frames/geodesic_{}/image-0{}.png'.format( log_directory_geodesics, n, i ), bbox_inches='tight' )
+            else:
+                plt.savefig( '{}/video_frames/geodesic_{}/image-{}.png'.format( log_directory_geodesics,n, i ), bbox_inches='tight' )
+            plt.close()
+
+
+        os.system("ffmpeg -framerate {} -i {}/video_frames/geodesic_{}/image-%03d.png {}/video_{}.webm".format(25,log_directory_geodesics, n ,log_directory_geodesics, n))
+        print("Video {} done".format(n))
+    return None
+
 
     
 

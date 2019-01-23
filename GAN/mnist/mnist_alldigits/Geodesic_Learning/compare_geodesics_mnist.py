@@ -52,7 +52,7 @@ def sort_geodesics(_geodesics_dict):
 z_start_values, z_end_values = initialize_endpoints_of_curve( endpoint_initialization_mode )
 
 
-geodesics_dict, geodesics_suppl_dict = compute_geodesics(z_start_values, z_end_values)
+geodesics_dict, geodesics_suppl_dict= compute_geodesics(z_start_values, z_end_values)
 
 
 if endpoint_initialization_mode=="custom":
@@ -69,11 +69,10 @@ if endpoint_initialization_mode=="custom":
 reals,labels = geodesics_suppl_dict['reals']
 
 for method in methods:
-	print(method)
-	curves_in_sample_space_value,cost,curves_in_pca_space_value = geodesics_dict[method]
-	print(cost)
-	plot_geodesic(curves_in_sample_space_value, method)
-
-	plot_geodesics_in_pca_space(curves_in_pca_space_value,method,reals,labels)
+    print(method)
+    curves_in_sample_space_value,cost,curves_in_pca_space_value = geodesics_dict[method]
+    print(cost)
+    plot_geodesic(curves_in_sample_space_value, method)
+    plot_geodesics_in_pca_space(curves_in_pca_space_value,method,reals,labels)
 
 

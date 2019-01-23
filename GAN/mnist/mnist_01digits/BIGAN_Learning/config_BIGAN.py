@@ -9,14 +9,12 @@ n_batch_size = 128
 
 
 
-n_BIGAN_iterations = int(400.0*60000.0/n_batch_size)
 n_discriminator_inner = 5
 n_generator_encoder_inner = 1
 
 
 
-log_directory = "logs"
-log_directory_01 = "logs_01"
+log_directory_01 = "logs"
 
 learning_rate = 1e-4
 

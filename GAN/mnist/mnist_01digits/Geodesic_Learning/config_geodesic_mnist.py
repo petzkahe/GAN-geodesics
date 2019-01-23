@@ -4,7 +4,7 @@ learning_rate_geodesics = 1e-2
 adam_beta1 = 0.5
 adam_beta2 = 0.999
 
-n_train_iterations_geodesics = 5000
+n_train_iterations_geodesics = 5
 
 n_geodesics = 5 
 n_interpolations_points_geodesic_approx = 128 # 128 # or 1024??
@@ -46,4 +46,4 @@ initialization_value_coefficients=0.5
 
 penalty=False
 
-log_directory_geodesics = 'logs_geo'
+log_directory_geodesics = 'logs'

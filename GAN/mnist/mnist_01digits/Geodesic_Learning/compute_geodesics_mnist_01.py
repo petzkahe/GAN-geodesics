@@ -1,5 +1,7 @@
 from GAN.mnist.mnist_01digits.Geodesic_Learning.geodesic_graph_mnist import *
 from tensorflow.examples.tutorials.mnist import input_data
+from GAN.mnist.mnist_01digits.main_config import *
+
 
 
 def set_up_training(objective_Jacobian, objective_proposed):
@@ -82,16 +84,10 @@ def compute_geodesics(latent_start, latent_end):
     train_geodesic_Jacobian, train_geodesic_proposed = set_up_training( geodesic_objective_function_Jacobian,
                                                                         geodesic_objective_function_proposed )
 
-    mnist_dir = "../../MNIST_data"
-    print('Trying out mnist_dir=' + str(mnist_dir))
-    dataset = input_data.read_data_sets(mnist_dir)
-    training_data = dataset.train.images
-    training_labels = dataset.train.labels
+    training_data = np.load(results_directory + 'Data/selected_train_data.npy')
+    training_labels = np.load(results_directory + 'Data/selected_train_labels.npy')
 
-    training_data = np.array([training_data[key] for (key, label) in enumerate(training_labels) if int(label) == 0 or int(label) == 1])
-    training_labels = np.array([training_labels[key] for (key, label) in enumerate(training_labels) if int(label) == 0 or int(label) == 1])
-
-    V = np.load('../utils/svd_right_save.npy')
+    V = np.load(results_directory + 'PCA/right_singular_vectors.npy')
     _subspace_map = V[:,:dim_pca]
 
     with tf.Session() as session:
@@ -103,17 +99,17 @@ def compute_geodesics(latent_start, latent_end):
         for method in methods:
             session.run( tf.global_variables_initializer() )
 
-            model_saver.restore( session, tf.train.latest_checkpoint( '../BIGAN_Learning/trained_model_01/' ) )
+            model_saver.restore( session, tf.train.latest_checkpoint( results_directory + 'BIGAN/trained_model/' ) )
 
             
             if method == "Jacobian":
                 curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian, None, _subspace_map )
                 print( 'Jacobian done!' )
             elif method == "proposed":
-                train_writer = tf.summary.FileWriter( './graphs', session.graph )
+                #train_writer = tf.summary.FileWriter( './graphs', session.graph )
                 curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(
                     method, latent_start, latent_end,
-                    session, train_geodesic_proposed, train_writer, _subspace_map )
+                    session, train_geodesic_proposed, None, _subspace_map )
                 print( 'Proposed done!' )
 
             elif method == "linear":

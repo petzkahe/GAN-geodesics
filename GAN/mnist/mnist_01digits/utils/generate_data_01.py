@@ -1,35 +1,33 @@
 from GAN.mnist.mnist_01digits.BIGAN_Learning.config_BIGAN import *
+from GAN.mnist.mnist_01digits.main_config import *
 import numpy as np
-from tensorflow.examples.tutorials.mnist import input_data
-
-dataset = input_data.read_data_sets( 'MNIST_data' )
-	
-training_data = dataset.train.images
-training_labels = dataset.train.labels
-
-training_data = np.array([training_data[key] for (key, label) in enumerate(training_labels) if int(label) == 0 or int(label) == 1])
-#training_labels = np.array([training_labels[key] for (key, label) in enumerate(training_labels) if int(label) == 0 or int(label) == 1])
 
 counter = 0
 
-#
+train_data = np.load(results_directory + 'Data/selected_train_data.npy')
+train_labels = np.load(results_directory + 'Data/selected_train_labels.npy')
+
+
 # # generate real samples
 def generate_real_data(n_batch):
 #
 	global counter
-	global training_data
+	global train_data
+	global train_labels
 	
-	if counter+n_batch > int(training_data.shape[0]):
-		np.random.shuffle(training_data)
+	if counter+n_batch > int(train_data.shape[0]):
+		rng_state = np.random.get_state()
+		np.random.shuffle(train_data)
+		np.random.set_state(rng_state)
+		np.random.shuffle(train_labels)
+
 		counter = 0
 		
-	data = training_data[counter:counter+n_batch,:]
+	_data = train_data[counter:counter+n_batch,:]
 	counter += n_batch
 
-	return data
-#     while True:
-#         data, _ = dataset.train.next_batch(n_batch)
-#         yield data
+	return _data
+
 
 
 

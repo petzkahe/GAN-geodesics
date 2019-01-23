@@ -8,7 +8,7 @@ n_train_iterations_geodesics = 10000
 
 n_geodesics = 5
 n_interpolations_points_geodesic_approx = 256 # 128 # or 1024??
-degree_polynomial_geodesic_latent = 6
+degree_polynomial_geodesic_latent = 3
 
 n_interp_selected = 15
 
@@ -23,7 +23,7 @@ n_batch_pca = 1000
 
 
 
-endpoint_initialization_mode = "custom"
+endpoint_initialization_mode = "random"
 # z_start_center = [-0.75,-0.75]
 # z_end_center = [0.5,-0.75]
 

@@ -131,7 +131,7 @@ def compute_geodesics(latent_start, latent_end):
 
             if not os.path.exists( 'trained_polynomials/{}'.format(method) ):
                 os.makedirs( 'trained_polynomials/{}'.format(method) )
-            coefficients_saver.save( session, 'trained_polynomials/{}'.format(method) )
+            coefficients_saver.save( session, 'trained_polynomials/{}/{}'.format(method,method) )
 
             #variables_names = [v.name for v in tf.trainable_variables()]
             #values = session.run( variables_names )
@@ -148,7 +148,7 @@ def compute_geodesics(latent_start, latent_end):
         reals_in_pca = session.run(real_samples_in_pca_space, feed_dict={real_samples_for_pca: reals, subspace_map: _subspace_map} )
         suppl_dict['reals'] = [reals_in_pca,labels]
 
-
+        np.save( 'trained_polynomials/latent_start_end_points', [latent_start, latent_end] )
 
 
         return dict, suppl_dict

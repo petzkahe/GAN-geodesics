@@ -6,24 +6,26 @@ import numpy as np
 with tf.variable_scope("BIGAN", reuse=tf.AUTO_REUSE):
 
     def Generator(noise):
-        output = layer.ReLuLayer(dim_latent, dim_nn, noise, "Generator.1")
+        output = layer.ReLuLayerWithBatchN(dim_latent, dim_nn, noise, "Generator.1")
         output = layer.ReLuLayerWithBatchN(dim_nn, dim_nn, output, "Generator.2")
         output = layer.LinearLayer(dim_nn, dim_data, output, "Generator.3")
+        #output = layer.SigmoidLayer(dim_nn, dim_data, output, "Generator.3")
         return output
 
-
+  
     def Discriminator(inputs, noise):
-        inputs_noise = tf.concat([inputs,noise],axis=1)
-        output = layer.LeakyReLuLayer(dim_data+dim_latent, dim_nn, inputs_noise,"Discriminator.1")
-        output = layer.LeakyReLuLayerWithBatchN(dim_nn, dim_nn, output, "Discriminator.2")
-        output = layer.SigmoidLayer(dim_nn, 1, output, "Discriminator.3")
+        output = tf.concat([inputs,noise],axis=1)
+        output = layer.LeakyReLuLayerWithBatchN(dim_data+dim_latent, dim_nn_disc, output,"Discriminator.1")
+        #output = layer.LeakyReLuLayerWithBatchN(dim_nn_disc, dim_nn_disc, output, "Discriminator.2")
+        output = layer.SigmoidLayer(dim_nn_disc, 1, output, "Discriminator.3")
         return output
 
 
     def Encoder(inputs):
-        output = layer.LeakyReLuLayer( dim_data, dim_nn, inputs, "Encoder.1" )
+        output = layer.LeakyReLuLayerWithBatchN( dim_data, dim_nn, inputs, "Encoder.1" )
         output = layer.LeakyReLuLayerWithBatchN( dim_nn, dim_nn, output, "Encoder.2" )
         output = layer.LinearLayer( dim_nn, dim_latent, output, "Encoder.3" )
+        #output = layer.TanhLayer( dim_nn, dim_latent, output, "Encoder.3" )
         return output
 
 
@@ -48,7 +50,9 @@ with tf.variable_scope("BIGAN", reuse=tf.AUTO_REUSE):
     data_generated = Generator(data_latent)
     data_encoded = Encoder(data_real)
     disc_values_on_real = Discriminator(data_real, data_encoded)
+    disc_values_on_real_mean = tf.reduce_mean(disc_values_on_real)
     disc_values_on_generated = Discriminator(data_generated, data_latent)
+    disc_values_on_generated_mean = tf.reduce_mean(disc_values_on_generated)
 
     # Objectives
 

@@ -46,7 +46,7 @@ else:
 ## TRAIN BIGAN
 from GAN.mnist.mnist_01digits.BIGAN_Learning.train_01 import *
 
-if os.path.exists(results_directory + 'BIGAN'):
+if os.path.exists(results_directory + 'BIGAN/trained_model'):
 	# set directory for trained_model or do nothing
 	print('BIGAN already trained!')
 else:

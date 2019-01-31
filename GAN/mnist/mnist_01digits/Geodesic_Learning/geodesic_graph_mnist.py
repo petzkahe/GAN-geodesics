@@ -128,8 +128,8 @@ diff_square_vector_latent = tf.reduce_sum(
     tf.square( curves_in_latent_space[1:, :, :] - curves_in_latent_space[:-1, :, :] ), axis=1 )
 
 # penalty for leaving domain
-#out_of_domain_penalty = tf.add(
-#    tf.exp( tf.clip_by_value( tf.add( tf.abs( curves_in_latent_space ), -1 ), 0, np.infty ) ), -1 )
+out_of_domain_penalty = tf.add(
+    tf.exp( 100*tf.clip_by_value( tf.add( tf.abs( curves_in_latent_space ), -1 ), 0, np.infty ) ), -1 )
 
 small_eps = 0.01
 
@@ -169,11 +169,11 @@ else:
 geodesic_objective_per_geodesic_proposed = tf.reduce_sum( objective_vector_proposed, axis=0 )
 # geodesic_objective_per_geodesic_proposed = tf.Print(geodesic_objective_per_geodesic_proposed,[geodesic_objective_per_geodesic_proposed])
 geodesic_objective_function_proposed = tf.reduce_sum(
-    geodesic_objective_per_geodesic_proposed ) + penalty_hyper_param * geodesic_penalty # + tf.reduce_sum( out_of_domain_penalty )
+    geodesic_objective_per_geodesic_proposed ) + penalty_hyper_param * geodesic_penalty  + tf.reduce_sum( out_of_domain_penalty )
 
 geodesic_objective_per_geodesic_Jacobian = tf.reduce_sum( objective_vector_Jacobian, axis=0 )
 geodesic_objective_function_Jacobian = tf.reduce_sum(
-    geodesic_objective_per_geodesic_Jacobian ) + penalty_hyper_param * geodesic_penalty # + tf.reduce_sum( out_of_domain_penalty )
+    geodesic_objective_per_geodesic_Jacobian ) + penalty_hyper_param * geodesic_penalty + tf.reduce_sum( out_of_domain_penalty )
 
 
 geodesic_objective_per_geodesic_linear = tf.reduce_sum( objective_vector_linear, axis=0 )

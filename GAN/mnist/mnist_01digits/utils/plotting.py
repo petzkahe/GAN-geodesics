@@ -12,14 +12,14 @@ from GAN.mnist.mnist_01digits.Geodesic_Learning.config_geodesic_mnist import *
 from GAN.mnist.mnist_01digits.main_config import *
 
 
-def plot_sample_space_01(samples, iteration_step,_dir):
+def plot_sample_space_01(samples,disc, iteration_step,_dir):
     plt.figure( figsize=(12, 10) )
     gs = gridspec.GridSpec( 5, 5 )
     for j, generated_image in enumerate( samples ):
         ax = plt.subplot( gs[j] )
         ax.set_xticks( [] )
         ax.set_yticks( [] )
-        #ax.set_title( 'guess = {}, true = {}'.format( arg_max, true ) )
+        ax.set_title( 'D(x,z) = {}'.format( int(disc[j]*100)/100.0 ) )
         c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r', vmin=0, vmax=1)
         plt.colorbar(c)
     plt.savefig('{}/frame_{}.png'.format(_dir + log_directory_01, iteration_step), bbox_inches='tight' )
@@ -85,7 +85,7 @@ def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict, _dir):
 
 
     #plot reals and labels
-    ax.scatter(reals[:,0],reals[:,1],c=labels,s=5,cmap='gray')
+    ax.scatter(reals[:,0],reals[:,1],c=labels,s=5,cmap='inferno')
     #for i, txt in enumerate(labels):
     #    ax.annotate(txt, (reals[i,0], reals[i,1]))
 

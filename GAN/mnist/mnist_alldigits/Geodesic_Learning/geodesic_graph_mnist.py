@@ -213,13 +213,6 @@ n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
 
 
 
-######################
-#### VIDEO CREATION
-#######################
-
-
-
-
 #tf.summary.scalar( "geodesic_objective_function_proposed", geodesic_objective_function_proposed )
 #for iter in range( min( n_geodesics, 10 ) ):
 #    tf.summary.scalar( "geodesic_objective_per_geodesic_proposed_" + str( iter ),

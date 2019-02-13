@@ -33,13 +33,11 @@ print('Selected data loaded!')
 print('Checking for PCA...')
 
 if os.path.exists(results_directory + 'PCA'):
-	V = np.load(results_directory + 'PCA/right_singular_vectors.npy')
-	subspace_map = V[:,:dim_subspace]
-	print('... aquired!')
+	print('... PCA exists!')
 else:
 	os.makedirs(results_directory + 'PCA')
 	print('not found, calculating...')
-	subspace_map = get_pca_subspace(train_data,dim_subspace,results_directory+'PCA/')
+	subspace_map, mean_per_pixel = get_pca_subspace(train_data,dim_subspace,results_directory+'PCA/')
 	print('... Done!')
 
 

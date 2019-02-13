@@ -27,7 +27,7 @@ def set_up_training(objective_Jacobian, objective_proposed):
     return train_Jacobian, train_proposed
 
 
-def find_geodesics(method, start, end, sess, training, train_writer,V):
+def find_geodesics(method, start, end, sess, training, train_writer, V, _mean_per_pixel):
     if method == "proposed":
         print('Proposed method training')
         for iteration in range( n_train_iterations_geodesics ):
@@ -35,9 +35,9 @@ def find_geodesics(method, start, end, sess, training, train_writer,V):
             if iteration % 500 == 0:
                 print(str(int(iteration/n_train_iterations_geodesics*100.0)) + ' %')
 
-        curves_in_sample_space_value, _objective_values, curves_in_pca_space_value = sess.run(
-            [curves_in_sample_space, geodesic_objective_per_geodesic_proposed, curves_in_pca_space],
-            feed_dict={z_start: start, z_end: end,subspace_map:V} )
+        curves_in_sample_space_value, _disc_values_curves_sample_space, _objective_values, curves_in_pca_space_value = sess.run(
+            [curves_in_sample_space, disc_values_curves_sample_space, geodesic_objective_per_geodesic_proposed, curves_in_pca_space],
+            feed_dict={z_start: start, z_end: end,subspace_map:V, mean_per_pixel:_mean_per_pixel} )
 
     elif method == "Jacobian":
         print('Jacobian method training')
@@ -46,19 +46,19 @@ def find_geodesics(method, start, end, sess, training, train_writer,V):
             if iteration % 500 == 0:
                 print(str(int(iteration/n_train_iterations_geodesics*100.0)) + ' %')
 
-        curves_in_sample_space_value, _objective_values, curves_in_pca_space_value = sess.run(
-            [curves_in_sample_space, geodesic_objective_per_geodesic_Jacobian, curves_in_pca_space],
-            feed_dict={z_start: start, z_end: end,subspace_map:V} )
+        curves_in_sample_space_value, _disc_values_curves_sample_space, _objective_values, curves_in_pca_space_value = sess.run(
+            [curves_in_sample_space, disc_values_curves_sample_space, geodesic_objective_per_geodesic_Jacobian, curves_in_pca_space],
+            feed_dict={z_start: start, z_end: end,subspace_map:V, mean_per_pixel: _mean_per_pixel} )
 
     elif method == "linear":
-        curves_in_sample_space_value, _objective_values, curves_in_pca_space_value = sess.run(
-            [lines_in_sample_space, geodesic_objective_per_geodesic_linear, lines_in_pca_space],
-            feed_dict={z_start: start, z_end: end, subspace_map:V} )
+        curves_in_sample_space_value, _disc_values_curves_sample_space, _objective_values, curves_in_pca_space_value = sess.run(
+            [lines_in_sample_space, disc_values_curves_sample_space, geodesic_objective_per_geodesic_linear, lines_in_pca_space],
+            feed_dict={z_start: start, z_end: end, subspace_map:V, mean_per_pixel:_mean_per_pixel} )
         # _objective_values = None
 
     else:
         raise Exception( "method {} unknown".format( method ) )
-    return curves_in_sample_space_value, _objective_values, curves_in_pca_space_value
+    return curves_in_sample_space_value, _disc_values_curves_sample_space, _objective_values, curves_in_pca_space_value
 
 
 def create_grid(_min, _max,_n):
@@ -89,6 +89,7 @@ def compute_geodesics(latent_start, latent_end):
 
     V = np.load(results_directory + 'PCA/right_singular_vectors.npy')
     _subspace_map = V[:,:dim_pca]
+    _mean_per_pixel = np.load( results_directory + 'PCA/mean_per_pixel.npy' )
 
     with tf.Session() as session:
 
@@ -103,28 +104,28 @@ def compute_geodesics(latent_start, latent_end):
             print(results_directory)
             
             if method == "Jacobian":
-                curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian, None, _subspace_map )
+                curves_in_sample_space_value, disc_values_curves_sample_space, objective_values, curves_in_pca_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian, None, _subspace_map, _mean_per_pixel )
                 print( 'Jacobian done!' )
             elif method == "proposed":
                 #train_writer = tf.summary.FileWriter( './graphs', session.graph )
-                curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(
+                curves_in_sample_space_value, disc_values_curves_sample_space, objective_values, curves_in_pca_space_value = find_geodesics(
                     method, latent_start, latent_end,
-                    session, train_geodesic_proposed, None, _subspace_map )
+                    session, train_geodesic_proposed, None, _subspace_map, _mean_per_pixel )
                 print( 'Proposed done!' )
 
             elif method == "linear":
-                curves_in_sample_space_value, objective_values, curves_in_pca_space_value = find_geodesics(
+                curves_in_sample_space_value, disc_values_curves_sample_space, objective_values, curves_in_pca_space_value = find_geodesics(
                     method, latent_start,
                     latent_end,
                     session,
-                    None, None, _subspace_map )
+                    None, None, _subspace_map, _mean_per_pixel )
 
 
 
             else:
                 raise Exception( "method {} unknown".format( method ) )
 
-            dict[method] = [curves_in_sample_space_value, objective_values, curves_in_pca_space_value]
+            dict[method] = [curves_in_sample_space_value, disc_values_curves_sample_space, objective_values, curves_in_pca_space_value]
             
             #variables_names = [v.name for v in tf.trainable_variables()]
             #values = session.run( variables_names )
@@ -139,24 +140,17 @@ def compute_geodesics(latent_start, latent_end):
         
         # feed into session
         
-        reals_in_pca = session.run(real_samples_in_pca_space, feed_dict={real_samples_for_pca: reals, subspace_map: _subspace_map} )
+        reals_in_pca = session.run(real_samples_in_pca_space, feed_dict={real_samples_for_pca: reals, subspace_map: _subspace_map, mean_per_pixel: _mean_per_pixel} )
         suppl_dict['reals'] = [reals_in_pca,labels]
 
-        # Uniform pca background
-        grid_in_pca_vectorized = create_grid(pca_grid_minima, pca_grid_maxima,n_pca_grid_per_dimension)
-        [_gridpoints_discriminated_vectorized] = session.run([gridpoints_discriminated], feed_dict={gridpoints_in_pca_space: grid_in_pca_vectorized,subspace_map:_subspace_map})
-        _gridpoints_discriminated = _gridpoints_discriminated_vectorized.reshape((n_pca_grid_per_dimension, n_pca_grid_per_dimension))
-        suppl_dict["background"] = _gridpoints_discriminated
-
-
-        # Latent space background
+        # Latent space background = discriminator backgropund of samples coming from the latent space
 
             # generate random points in latent space
         latent_points = np.random.uniform( low=latent_points_minima, high=latent_points_maxima,
                                            size=[n_latent_background, dim_latent] ).astype('float32' )
             # output points in pca, and discriminator values from session
-        pca_points,discriminator_points = session.run([points_in_pca_space,points_discriminated], 
-            feed_dict={points_in_latent_space:latent_points, subspace_map: _subspace_map})
+        pca_points,discriminator_points = session.run([points_in_pca_space, points_discriminated],
+            feed_dict={points_in_latent_space:latent_points, subspace_map: _subspace_map, mean_per_pixel: _mean_per_pixel})
             # add to suppl_dict
         print('Mean is ' + str(np.mean(discriminator_points)))
         suppl_dict["latent_background"] = [pca_points,discriminator_points]

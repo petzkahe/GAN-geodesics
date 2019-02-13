@@ -4,7 +4,7 @@ learning_rate_geodesics = 1e-2
 adam_beta1 = 0.5
 adam_beta2 = 0.999
 
-n_train_iterations_geodesics = 50000
+n_train_iterations_geodesics = 100000
 
 n_geodesics = 10 
 n_interpolations_points_geodesic_approx = 128 # 128 # or 1024??
@@ -23,8 +23,7 @@ dim_pca = 2
 n_batch_pca = 10000
 n_pca_grid_per_dimension = 100
 n_pca_gridpoints = n_pca_grid_per_dimension**dim_pca
-pca_grid_minima = [-20,-10]
-pca_grid_maxima = [5,10]
+
 
 
 n_latent_background = 100000

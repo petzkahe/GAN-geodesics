@@ -1,4 +1,4 @@
-dim_latent = 2
+dim_latent = 15
 dim_data = 28 * 28
 
 dim_nn= 512

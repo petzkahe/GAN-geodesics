@@ -1,8 +1,8 @@
-dim_latent = 2
+dim_latent = 50
 dim_data = 28 * 28
 
 dim_nn= 512
-dim_nn_disc = 512
+dim_nn_disc = 256
 # Generator NN is then of form dim_latent -> dim_nn -> dim_nn*2 -> dim_nn -> dim_latent
 # Discriminator NN is then of form dim_latent -> dim_nn -> dim_nn*2 -> dim_nn -> 1
 

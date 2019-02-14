@@ -1,9 +1,9 @@
 dim_subspace = 2
 #selected_labels = [0,1]
 #selected_labels = [0,1,2]
-#selected_labels = [0,1,3]
+selected_labels = [0,1,3]
 #selected_labels = [3,7]
-selected_labels = [0,7] 
+#selected_labels = [0,7] 
 #selected_labels = [1,8] 
 
  

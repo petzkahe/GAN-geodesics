@@ -27,7 +27,7 @@ def plot_sample_space_01(samples,disc, iteration_step,_dir):
 
     return None
 
-def plot_geodesic(geodesics_in_sample_space, method, _dir):
+def plot_geodesic(geodesics_in_sample_space, disc_values, method, _dir):
 
     plt.clf()
 
@@ -38,15 +38,22 @@ def plot_geodesic(geodesics_in_sample_space, method, _dir):
 
 
     selected_geodesics_in_sample_space = geodesics_in_sample_space[filter,:,:]
+    selected_disc_values = disc_values[filter,:]
 
     selected_geodesics_in_sample_space_vectorized=np.reshape(np.transpose(selected_geodesics_in_sample_space, (2, 0, 1)),(n_geodesics *n_interp_selected, dim_data) )
     # first all interpolation points for first geodesic, then second, etc
-
+    selected_disc_values_vectorized = np.reshape(np.transpose(selected_disc_values, (1,0)), (n_geodesics*n_interp_selected))
 
     for j, generated_image in enumerate(selected_geodesics_in_sample_space_vectorized):
         ax = plt.subplot( gs[j] )
         ax.set_xticks( [] )
         ax.set_yticks( [] )
+
+        if np.isnan(selected_disc_values_vectorized[j]):
+            ax.set_title( "NaN")
+        else:
+            ax.set_title(int( selected_disc_values_vectorized[j] * 100 ) / 100.0)
+
         # ax.set_title( 'guess = {}, true = {}'.format( arg_max, true ) )
         c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r')
         plt.colorbar(c)
@@ -60,7 +67,6 @@ def plot_geodesic(geodesics_in_sample_space, method, _dir):
 def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict, _dir):
 
     reals,labels = geodesics_suppl_dict['reals']
-    background = geodesics_suppl_dict['background']
     latent_background_pca,latent_background_discriminator = geodesics_suppl_dict["latent_background"]
 
 

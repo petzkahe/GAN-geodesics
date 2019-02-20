@@ -1,5 +1,5 @@
-dim_latent = 50
-dim_latent = 15
+dim_latent = 32
+#dim_latent = 15
 dim_data = 28 * 28
 
 dim_nn= 512
@@ -9,7 +9,8 @@ dim_nn_disc = 256
 
 n_batch_size = 128
 
-
+which_gan = 'DCWGAN'
+which_gan = 'BIGAN'
 
 n_discriminator_inner = 1
 n_generator_encoder_inner = 1

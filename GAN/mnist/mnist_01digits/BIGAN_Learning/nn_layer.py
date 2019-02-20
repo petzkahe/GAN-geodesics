@@ -199,3 +199,31 @@ def LeakyReLuLayerWithBatchN(dim_latent, out_dim, input, name):
 
     return output
 
+
+def LeakyReLuDeconvLayer(input, n_filters, filter_size,strides=(1,1),padding='valid', leak = 0.2, name='Default')
+
+    conv = tf.layers.conv2d_transpose(input, n_filters, filter_size, strides=strides, padding=padding,name=name)
+    output = tf.nn.leaky_relu(conv,leak)
+
+    return output
+
+def LeakyReLuDeconvLayerWithBatchNN(input, channel, filter_size,strides=(1,1),padding='valid', leak = 0.2, name='Default')
+
+    conv = tf.layers.conv2d_transpose(input, n_filters, filter_size, strides=strides, padding=padding,name=name)
+    lrelu = tf.nn.leaky_relu(conv,leak)
+    output = tf.layers.batch_normalization(conv4, training = True, name = name + ".batch_nn")    
+
+
+def LeakyReLuConvLayer(input, n_filters, filter_size,strides=(1,1),padding='valid', leak = 0.2, name='Default')
+
+    conv = tf.layers.conv2d(input, n_filters, filter_size, strides=strides, padding=padding,name=name)
+    output = tf.nn.leaky_relu(conv,leak)
+
+    return output
+
+def LeakyReLuConvLayerWithBatchNN(input, channel, filter_size,strides=(1,1),padding='valid', leak = 0.2, name='Default')
+
+    conv = tf.layers.conv2d(input, n_filters, filter_size, strides=strides, padding=padding,name=name)
+    lrelu = tf.nn.leaky_relu(conv,leak)
+    output = tf.layers.batch_normalization(conv4, training = True, name = name + ".batch_nn") 
+

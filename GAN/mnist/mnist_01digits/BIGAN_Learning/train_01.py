@@ -1,5 +1,12 @@
 import os
-from GAN.mnist.mnist_01digits.BIGAN_Learning.BIGAN_graph import *
+
+from GAN.mnist.mnist_01digits.BIGAN_Learning.config_BIGAN import *
+
+if which_gan == 'BIGAN':
+    from GAN.mnist.mnist_01digits.BIGAN_Learning.BIGAN_graph import *
+elif which_gan == 'DCWGAN':
+    from GAN.mnist.mnist_01digits.BIGAN_Learning.DCWGAN_graph import *
+
 from GAN.mnist.mnist_01digits.utils.generate_data_01 import *
 from GAN.mnist.mnist_01digits.utils.plotting import *
 

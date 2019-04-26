@@ -32,18 +32,19 @@ def find_geodesics(method, start, end, sess, training, train_writer, V, _mean_pe
         print('Proposed method training')
         for iteration in range( n_train_iterations_geodesics ):
             _ = sess.run( [training], feed_dict={z_start: start, z_end: end} )
-            if iteration % 500 == 0:
+            if iteration % 100 == 0:
                 print(str(int(iteration/n_train_iterations_geodesics*100.0)) + ' %')
 
         curves_in_sample_space_value, _disc_values_curves_sample_space, _objective_values, curves_in_pca_space_value = sess.run(
             [curves_in_sample_space, disc_values_curves_sample_space, geodesic_objective_per_geodesic_proposed, curves_in_pca_space],
             feed_dict={z_start: start, z_end: end,subspace_map:V, mean_per_pixel:_mean_per_pixel} )
 
+
     elif method == "Jacobian":
         print('Jacobian method training')
         for iteration in range( n_train_iterations_geodesics ):
             _ = sess.run( [training], feed_dict={z_start: start, z_end: end} )
-            if iteration % 500 == 0:
+            if iteration % 100 == 0:
                 print(str(int(iteration/n_train_iterations_geodesics*100.0)) + ' %')
 
         curves_in_sample_space_value, _disc_values_curves_sample_space, _objective_values, curves_in_pca_space_value = sess.run(
@@ -103,7 +104,12 @@ def compute_geodesics(latent_start, latent_end):
             model_saver.restore( session, tf.train.latest_checkpoint( results_directory + 'BIGAN/trained_model/' ) )
             print(results_directory)
             
-            if method == "Jacobian":
+            _update_ops = session.run(update_ops, feed_dict={data_real: np.ones((1,dim_data)), data_latent: np.ones((1,dim_latent)), isTrain: True})
+
+            #" print(_update_ops)
+       
+
+            if method == "Jacobian": 
                 curves_in_sample_space_value, disc_values_curves_sample_space, objective_values, curves_in_pca_space_value = find_geodesics(method, latent_start, latent_end, session, train_geodesic_Jacobian, None, _subspace_map, _mean_per_pixel )
                 print( 'Jacobian done!' )
             elif method == "proposed":
@@ -143,6 +149,8 @@ def compute_geodesics(latent_start, latent_end):
         reals_in_pca = session.run(real_samples_in_pca_space, feed_dict={real_samples_for_pca: reals, subspace_map: _subspace_map, mean_per_pixel: _mean_per_pixel} )
         suppl_dict['reals'] = [reals_in_pca,labels]
 
+        
+        print(_update_ops)
         # Latent space background = discriminator backgropund of samples coming from the latent space
 
             # generate random points in latent space

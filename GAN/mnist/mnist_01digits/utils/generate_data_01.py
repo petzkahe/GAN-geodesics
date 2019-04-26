@@ -22,8 +22,10 @@ def generate_real_data(n_batch):
 		np.random.shuffle(train_labels)
 
 		counter = 0
+
+# MOD HERE-
 		
-	_data = train_data[counter:counter+n_batch,:]
+	_data = (train_data[counter:counter+n_batch,:])
 	counter += n_batch
 
 	return _data

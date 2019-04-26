@@ -1,4 +1,11 @@
-from GAN.mnist.mnist_01digits.BIGAN_Learning.BIGAN_graph import *
+from GAN.mnist.mnist_01digits.BIGAN_Learning.config_BIGAN import *
+
+if which_gan == 'BIGAN':
+    from GAN.mnist.mnist_01digits.BIGAN_Learning.BIGAN_graph import *
+elif which_gan == 'DCWGAN':
+    from GAN.mnist.mnist_01digits.BIGAN_Learning.DCWGAN_graph import *
+
+
 from GAN.mnist.mnist_01digits.Geodesic_Learning.config_geodesic_mnist import *
 import numpy as np
 
@@ -100,10 +107,24 @@ lines_in_latent_space_vectorized = tf.reshape( tf.transpose( lines_in_latent_spa
                                                n_geodesics * (n_interpolations_points_geodesic + 1), dim_latent) )
 
 with tf.variable_scope("BIGAN",reuse=True):
-    curves_in_sample_space_vectorized = Generator( curves_in_latent_space_vectorized )
-    disc_values_curves_sample_space_vectorized = Discriminator(curves_in_sample_space_vectorized, curves_in_latent_space_vectorized)
+    
+    if which_gan == 'DCWGAN':
+        curves_in_sample_space_vectorized_reshaped = Generator( tf.reshape(curves_in_latent_space_vectorized,
+                                shape=[n_geodesics * (n_interpolations_points_geodesic + 1),1,1,dim_latent]),isTrain=False)
+        curves_in_sample_space_vectorized = tf.reshape(curves_in_sample_space_vectorized_reshaped,
+                                shape=[n_geodesics * (n_interpolations_points_geodesic + 1),28**2])
+        disc_values_curves_sample_space_vectorized = Discriminator(tf.reshape(curves_in_sample_space_vectorized, 
+                                shape=[n_geodesics * (n_interpolations_points_geodesic + 1),28,28,1]),isTrain = False)
+        lines_in_sample_space_vectorized_reshaped = Generator(tf.reshape(lines_in_latent_space_vectorized,
+                                shape=[n_geodesics * (n_interpolations_points_geodesic + 1),1,1,dim_latent]) , isTrain = False)    
+        lines_in_sample_space_vectorized = tf.reshape(lines_in_sample_space_vectorized_reshaped,
+                                shape=[n_geodesics * (n_interpolations_points_geodesic + 1),28**2])
+        
+    elif which_gan == 'BIGAN':
+        curves_in_sample_space_vectorized = Generator( curves_in_latent_space_vectorized,isTrain=False)
+        disc_values_curves_sample_space_vectorized = Discriminator(curves_in_sample_space_vectorized, curves_in_latent_space_vectorized)
+        lines_in_sample_space_vectorized = Generator( lines_in_latent_space_vectorized, isTrain = False )
 
-    lines_in_sample_space_vectorized = Generator( lines_in_latent_space_vectorized )
 
 disc_values_curves_sample_space = tf.transpose(
     tf.reshape( disc_values_curves_sample_space_vectorized, shape=(n_geodesics, n_interpolations_points_geodesic + 1) ),
@@ -131,25 +152,57 @@ diff_square_vector_latent = tf.reduce_sum(
 out_of_domain_penalty = tf.add(
     tf.exp( 100*tf.clip_by_value( tf.add( tf.abs( curves_in_latent_space ), -1 ), 0, np.infty ) ), -1 )
 
-small_eps = 0.01
-
-disc_values_curves_sample_space_mean = tf.exp( tf.multiply( 0.5, tf.add( safe_log( disc_values_curves_sample_space[1:, :] ),
-                                                                    safe_log(
-                                                                        disc_values_curves_sample_space[:-1, :] ) ) ) )
-denominator = tf.clip_by_value( tf.add( disc_values_curves_sample_space_mean, small_eps ), small_eps, 0.8 + small_eps )
-
-# denominator = tf.Print(denominator,[denominator])
 
 
-denominator = tf.multiply( denominator, denominator )
 
-# objective_vector_proposed = tf.divide(1, denominator)
-# objective_vector_proposed = tf.divide(diff_square_vector_latent, denominator)
 
-# objective_vector_proposed = tf.divide(diff_square_vector,denominator)
-objective_vector_proposed = hyper_lambda*(0.8 + small_eps) ** 2 / n_interpolations_points_geodesic * tf.divide( 1.0,
-                                                                                                   denominator ) + tf.multiply(
-    diff_square_vector, float( n_interpolations_points_geodesic ) )
+
+if which_gan == 'DCWGAN':
+    #disc_values_curves_sample_space_mean =  0.5*(  tf.add(  disc_values_curves_sample_space[1:, :] ,
+    #                                                        disc_values_curves_sample_space[:-1, :] ) )
+    #denominator = disc_values_curves_sample_space_mean
+    #denominator = tf.multiply( denominator, denominator )
+    #objective_vector_proposed =  tf.divide( 1.0, denominator ) / float( n_interpolations_points_geodesic )
+    #                             + tf.multiply(diff_square_vector * float( n_interpolations_points_geodesic )
+
+
+
+    small_eps = 0.01
+
+
+    # Offset should be between generated and fake values
+    # Maybe should save during training and then  load this value
+    offset = 20
+    positified_disc_values_curves_sample_space =tf.nn.relu(disc_values_curves_sample_space+offset-1.)+1. + tf.clip_by_value(tf.exp(disc_values_curves_sample_space+offset-1.)-1.,-1,0.)
+
+    disc_values_averages = tf.multiply( 0.5, positified_disc_values_curves_sample_space[1:, :]+ positified_disc_values_curves_sample_space[:-1, :])
+
+
+    shifted_disc_values_averages = disc_values_averages - offset
+
+    denominator = tf.clip_by_value(disc_values_averages, small_eps,np.infty)
+
+   
+    objective_vector_proposed = hyper_lambda*  tf.divide( 1.0, denominator ) + tf.multiply(
+       diff_square_vector, float(n_interpolations_points_geodesic) )
+   
+
+
+elif which_gan == 'BIGAN':
+    small_eps = 0.01
+
+    disc_values_curves_sample_space_mean = tf.exp( tf.multiply( 0.5, tf.add( safe_log( disc_values_curves_sample_space[1:, :] ),
+                                                                        safe_log(
+                                                                            disc_values_curves_sample_space[:-1, :] ) ) ) )
+    denominator = tf.clip_by_value( tf.add( disc_values_curves_sample_space_mean, small_eps ), small_eps, 0.8 + small_eps )
+
+    denominator = tf.multiply( denominator, denominator )
+
+    objective_vector_proposed = hyper_lambda*(0.8 + small_eps) ** 2 / n_interpolations_points_geodesic \
+                                * tf.divide( 1.0, denominator ) \
+                                + tf.multiply(diff_square_vector, float( n_interpolations_points_geodesic ) )
+
+
 
 objective_vector_Jacobian = tf.multiply( diff_square_vector, float( n_interpolations_points_geodesic ) )
 
@@ -180,9 +233,9 @@ geodesic_objective_per_geodesic_linear = tf.reduce_sum( objective_vector_linear,
 
 ##########################################################################################
 
-# Illustrate curves in PCA-space:
+# # Illustrate curves in PCA-space:
 
-#   calculate pca for some real mnist samples of two/all classes
+# #   calculate pca for some real mnist samples of two/all classes
 real_samples_for_pca = tf.placeholder(tf.float32,shape=[n_batch_pca,dim_data],name='real_samples_for_pca')
 subspace_map = tf.placeholder(tf.float32,shape=[dim_data,dim_pca],name='subspace_map')
 mean_per_pixel = tf.placeholder(tf.float32, shape=[1,dim_data], name='mean_per_pixel')
@@ -191,9 +244,8 @@ real_samples_in_pca_space = tf.matmul(real_samples_for_pca-mean_per_pixel,subspa
 # Calculate pca for geodesics:
 # Jacobian and proposed methods
 curves_in_pca_space_vectorized = tf.matmul(curves_in_sample_space_vectorized-mean_per_pixel,subspace_map)
-curves_in_pca_space = tf.transpose( tf.reshape( curves_in_pca_space_vectorized, shape=(
-n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
-                                       perm=[1, 2, 0] )
+curves_in_pca_space = tf.transpose( tf.reshape( curves_in_pca_space_vectorized, 
+                        shape=(n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ), perm=[1, 2, 0] )
 # Linear method
 lines_in_pca_space_vectorized = tf.matmul(lines_in_sample_space_vectorized-mean_per_pixel,subspace_map)
 lines_in_pca_space = tf.transpose( tf.reshape( lines_in_pca_space_vectorized, shape=(
@@ -202,9 +254,16 @@ n_geodesics, n_interpolations_points_geodesic + 1, dim_pca) ),
 
 # background from latent space points
 points_in_latent_space = tf.placeholder(tf.float32,shape=[n_latent_background,dim_latent],name='gridpoints_in_pca_space')
+
 with tf.variable_scope("BIGAN",reuse=True):
-    points_in_sample_space = Generator(points_in_latent_space)
-    points_discriminated = Discriminator(points_in_sample_space,points_in_latent_space)
+    if which_gan == 'DCWGAN':
+        points_in_sample_space_reshaped = Generator(tf.reshape(points_in_latent_space,shape=[n_latent_background,1,1,dim_latent]), isTrain = False)
+        points_in_sample_space = tf.reshape(points_in_sample_space_reshaped,shape=[n_latent_background,28**2])
+        points_discriminated = Discriminator(points_in_sample_space_reshaped, isTrain = False)
+    elif which_gan == 'BIGAN':
+        points_in_sample_space = Generator(points_in_latent_space, isTrain = False)
+        points_discriminated = Discriminator(points_in_sample_space,points_in_latent_space, isTrain = False)
+    
 points_in_pca_space = tf.matmul(points_in_sample_space-mean_per_pixel,subspace_map)
 
 ##########################################################################################

@@ -1,3 +1,5 @@
+from GAN.mnist.mnist_01digits.BIGAN_Learning.config_BIGAN import *
+
 from GAN.mnist.mnist_01digits.Geodesic_Learning.compute_geodesics_mnist_01 import *
 from GAN.mnist.mnist_01digits.utils.plotting import *
 from GAN.mnist.mnist_01digits.main_config import *

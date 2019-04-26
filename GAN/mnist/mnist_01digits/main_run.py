@@ -17,12 +17,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'  # or any {'0', '1', '2', '3'}
 
 
 dataset = load_mnist_data(selected_labels)
-print(dataset.shape())
 train_data, train_labels = dataset['train']
 n_training_examples = train_data.shape[0]
 print(results_directory + 'Data')
 if os.path.exists(results_directory + 'Data') == False:
-	print('Hi!')
 	os.makedirs(results_directory + 'Data')
 	np.save(results_directory + 'Data/selected_train_data',train_data)
 	np.save(results_directory + 'Data/selected_train_labels',train_labels)
@@ -45,7 +43,7 @@ else:
 ## TRAIN BIGAN
 from GAN.mnist.mnist_01digits.BIGAN_Learning.train_01 import *
 
-if os.path.exists(results_directory + 'BIGAN/trained_model'):
+if os.path.isfile(results_directory + 'BIGAN/trained_model/mnistBIGAN.meta'):
 	# set directory for trained_model or do nothing
 	print('BIGAN already trained!')
 else:

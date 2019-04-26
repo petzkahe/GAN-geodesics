@@ -20,7 +20,8 @@ def plot_sample_space_01(samples,disc, iteration_step,_dir):
         ax.set_xticks( [] )
         ax.set_yticks( [] )
         ax.set_title( 'D(x,z) = {}'.format( int(disc[j]*100)/100.0 ) )
-        c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r', vmin=0, vmax=1)
+        c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r')
+        #c = plt.imshow( generated_image.reshape( 28, 28 ), cmap='Greys_r', vmin=0, vmax=1)
         plt.colorbar(c)
     plt.savefig('{}/frame_{}.png'.format(_dir + log_directory_01, iteration_step), bbox_inches='tight' )
     plt.close()
@@ -85,8 +86,8 @@ def plot_geodesics_in_pca_space(curves,method,geodesics_suppl_dict, _dir):
     yi = np.linspace(min(y),max(y),n_pca_grid_per_dimension)
     zi = griddata(x,y,z,xi,yi,interp='linear')
     #CS = ax.contour(xi, yi, zi, 5, linewidths=0.5, colors='k')
-    CS = ax.contourf(xi, yi, zi, 100,
-                  vmax=(1), vmin=0)
+    #CS = ax.contourf(xi, yi, zi, 100, vmax=(1), vmin=0)
+    CS = ax.contourf(xi, yi, zi, 100)
     fig.colorbar(CS)  # draw colorbar
 
 

@@ -5,25 +5,26 @@ import numpy as np
 
 with tf.variable_scope("BIGAN", reuse=tf.AUTO_REUSE):
 
-    def Generator(noise):
-        output = layer.ReLuLayerWithBatchN(dim_latent, dim_nn, noise, "Generator.1")
-        output = layer.ReLuLayerWithBatchN(dim_nn, dim_nn, output, "Generator.2")
+    def Generator(noise,isTrain = True):
+        output = layer.ReLuLayer(dim_latent, dim_nn, noise, "Generator.1")
+        output = layer.ReLuLayerWithBatchN(dim_nn, dim_nn, output, isTrain, "Generator.2")
         output = layer.LinearLayer(dim_nn, dim_data, output, "Generator.3")
         #output = layer.SigmoidLayer(dim_nn, dim_data, output, "Generator.3")
+        #output = layer.TanhLayer(dim_nn, dim_data, output, "Generator.3")/2. + .5
         return output
 
   
-    def Discriminator(inputs, noise):
+    def Discriminator(inputs, noise, isTrain = True):
         output = tf.concat([inputs,noise],axis=1)
-        output = layer.LeakyReLuLayerWithBatchN(dim_data+dim_latent, dim_nn_disc, output,"Discriminator.1")
+        output = layer.LeakyReLuLayerWithBatchN(dim_data+dim_latent, dim_nn_disc, output, isTrain, "Discriminator.1")
         #output = layer.LeakyReLuLayerWithBatchN(dim_nn_disc, dim_nn_disc, output, "Discriminator.2")
-        output = layer.SigmoidLayer(dim_nn_disc, 1, output, "Discriminator.3")
+        output = layer.SigmoidLayer(dim_nn_disc, 1, output,"Discriminator.3")
         return output
 
 
-    def Encoder(inputs):
-        output = layer.LeakyReLuLayerWithBatchN( dim_data, dim_nn, inputs, "Encoder.1" )
-        output = layer.LeakyReLuLayerWithBatchN( dim_nn, dim_nn, output, "Encoder.2" )
+    def Encoder(inputs, isTrain = True):
+        output = layer.LeakyReLuLayer( dim_data, dim_nn, inputs, "Encoder.1" )
+        output = layer.LeakyReLuLayerWithBatchN( dim_nn, dim_nn, output, isTrain, "Encoder.2" )
         output = layer.LinearLayer( dim_nn, dim_latent, output, "Encoder.3" )
         #output = layer.TanhLayer( dim_nn, dim_latent, output, "Encoder.3" )
         return output
@@ -39,6 +40,7 @@ with tf.variable_scope("BIGAN", reuse=tf.AUTO_REUSE):
 
     data_real = tf.placeholder(tf.float32, shape=[None, dim_data], name='reals')
     data_latent = tf.placeholder(tf.float32, shape=[None, dim_latent], name='latent')
+    isTrain = tf.placeholder(dtype=tf.bool)
 
 
 
@@ -47,11 +49,11 @@ with tf.variable_scope("BIGAN", reuse=tf.AUTO_REUSE):
     # Build graph
 
 
-    data_generated = Generator(data_latent)
-    data_encoded = Encoder(data_real)
-    disc_values_on_real = Discriminator(data_real, data_encoded)
+    data_generated = Generator(data_latent, isTrain)
+    data_encoded = Encoder(data_real, isTrain)
+    disc_values_on_real = Discriminator(data_real, data_encoded, isTrain)
     disc_values_on_real_mean = tf.reduce_mean(disc_values_on_real)
-    disc_values_on_generated = Discriminator(data_generated, data_latent)
+    disc_values_on_generated = Discriminator(data_generated, data_latent, isTrain)
     disc_values_on_generated_mean = tf.reduce_mean(disc_values_on_generated)
 
     # Objectives

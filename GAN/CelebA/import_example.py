@@ -27,6 +27,8 @@ print(images.shape)
 disc_values = D.run(images)
 print(disc_values)
 
+
+
 # Convert images to PIL-compatible format.
 images = np.clip(np.rint((images + 1.0) / 2.0 * 255.0), 0.0, 255.0).astype(np.uint8) # [-1,1] => [0,255]
 images = images.transpose(0, 2, 3, 1) # NCHW => NHWC
